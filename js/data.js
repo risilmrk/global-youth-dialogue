@@ -1797,11 +1797,11 @@ class DataService {
 
   getApplicationsApiUrl() {
     if (typeof window !== 'undefined' && window.location && window.location.origin) {
-      if (window.location.origin.includes('vercel.app')) {
+      if (window.location.origin.includes('vercel.app') || window.location.origin.includes('thegyde.in')) {
         return '/api/applications';
       }
     }
-    return 'https://gydonline.vercel.app/api/applications';
+    return 'https://www.thegyde.in/api/applications';
   }
 
   async syncRemoteApplications() {

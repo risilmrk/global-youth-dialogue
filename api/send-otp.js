@@ -50,7 +50,7 @@ This code will expire in 10 minutes. If you did not request this, please disrega
 ---
 Global Youth Dialogue & Exchange (GYDE)
 International Community of Youth Debaters
-Official Platform: https://gydonline.vercel.app`;
+Official Platform: https://www.thegyde.in`;
 
   const htmlBody = `<!DOCTYPE html>
 <html lang="en">
@@ -94,7 +94,7 @@ Official Platform: https://gydonline.vercel.app`;
     </div>
     <div class="footer">
       &copy; Global Youth Dialogue & Exchange (GYDE) &bull; International Community of Youth Debaters<br>
-      <a href="https://gydonline.vercel.app" style="color: #4851ba; text-decoration: none;">gydonline.vercel.app</a>
+      <a href="https://www.thegyde.in" style="color: #4851ba; text-decoration: none;">thegyde.in</a>
     </div>
   </div>
 </body>
@@ -108,13 +108,13 @@ function getApprovalEmailContent(name) {
 
 Congratulations! Your application for Community Membership in Global Youth Dialogue & Exchange (GYDE) has been officially approved by the Secretariat.
 
-You can now log in to the platform at https://gydonline.vercel.app using your registered email address and the password you set during your application.
+You can now log in to the platform at https://www.thegyde.in using your registered email address and the password you set during your application.
 
 Welcome to our international community of youth debaters and scholars!
 
 ---
 Global Youth Dialogue & Exchange (GYDE)
-Official Platform: https://gydonline.vercel.app`;
+Official Platform: https://www.thegyde.in`;
 
   const htmlBody = `<!DOCTYPE html>
 <html lang="en">
@@ -151,7 +151,7 @@ Official Platform: https://gydonline.vercel.app`;
         You can now sign in to your Member Portal using your registered email and the exact password you created when you submitted your membership application.
       </div>
       <div class="action-box">
-        <a href="https://gydonline.vercel.app" class="btn">Sign In to Member Portal &rarr;</a>
+        <a href="https://www.thegyde.in" class="btn">Sign In to Member Portal &rarr;</a>
       </div>
       <div class="text" style="font-size: 0.88rem; color: #64748b;">
         As a verified member, you can participate in weekly structured parliamentary dialogues, collaborate on academic research papers, and connect with fellow youth leaders across 14+ nations.
@@ -159,7 +159,7 @@ Official Platform: https://gydonline.vercel.app`;
     </div>
     <div class="footer">
       &copy; Global Youth Dialogue & Exchange (GYDE) &bull; International Community of Youth Debaters<br>
-      <a href="https://gydonline.vercel.app" style="color: #047857; text-decoration: none;">gydonline.vercel.app</a>
+      <a href="https://www.thegyde.in" style="color: #047857; text-decoration: none;">thegyde.in</a>
     </div>
   </div>
 </body>
@@ -229,7 +229,7 @@ function sendViaPureTLS(toEmail, code, name, conf, isApproval = false) {
 
       if (step === 0 && reply.startsWith('220')) {
         step = 1;
-        socket.write('EHLO gydonline.vercel.app\r\n');
+        socket.write('EHLO thegyde.in\r\n');
       } else if (step === 1 && reply.startsWith('250')) {
         step = 2;
         socket.write('AUTH LOGIN\r\n');

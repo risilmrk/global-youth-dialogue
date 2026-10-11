@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
-          : 'https://gydonline.vercel.app/api/applications';
+          : 'https://www.thegyde.in/api/applications';
         const res = await fetch(apiUrl);
         if (res.ok) {
           const remoteApps = await res.json();
@@ -1056,7 +1056,7 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
-          : 'https://gydonline.vercel.app/api/applications';
+          : 'https://www.thegyde.in/api/applications';
         const res = await fetch(apiUrl);
         if (res.ok) {
           const remoteApps = await res.json();

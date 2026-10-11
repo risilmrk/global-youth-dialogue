@@ -168,7 +168,7 @@ function sendAdminNotification(app) {
         const reply = data.toString();
         if (step === 0 && reply.startsWith('220')) {
           step = 1;
-          socket.write('EHLO gydonline.vercel.app\r\n');
+          socket.write('EHLO thegyde.in\r\n');
         } else if (step === 1 && reply.startsWith('250')) {
           step = 2;
           socket.write('AUTH LOGIN\r\n');
@@ -248,7 +248,7 @@ function sendApplicantApprovalNotification(app) {
         const reply = data.toString();
         if (step === 0 && reply.startsWith('220')) {
           step = 1;
-          socket.write('EHLO gydonline.vercel.app\r\n');
+          socket.write('EHLO thegyde.in\r\n');
         } else if (step === 1 && reply.startsWith('250')) {
           step = 2;
           socket.write('AUTH LOGIN\r\n');
@@ -288,11 +288,11 @@ function sendApplicantApprovalNotification(app) {
             `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">We are pleased to inform you that your application for Community Membership in Global Youth Dialogue & Exchange has been <strong>approved</strong>!</p>`,
             `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">You can now navigate to the Sign-In page and log in using your registered email and the exact password you created when you submitted your membership application.</p>`,
             `<div style="text-align: center; margin: 26px 0;">`,
-            `<a href="https://gydonline.vercel.app" style="display: inline-block; background: #047857; color: #ffffff; padding: 12px 26px; border-radius: 8px; text-decoration: none; font-weight: 700;">Sign In to Member Portal &rarr;</a>`,
+            `<a href="https://www.thegyde.in" style="display: inline-block; background: #047857; color: #ffffff; padding: 12px 26px; border-radius: 8px; text-decoration: none; font-weight: 700;">Sign In to Member Portal &rarr;</a>`,
             `</div>`,
             `</div>`,
             `<div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; font-size: 0.78rem; color: #94a3b8; text-align: center;">`,
-            `&copy; Global Youth Dialogue & Exchange (GYDE) &bull; <a href="https://gydonline.vercel.app" style="color: #047857; text-decoration: none;">gydonline.vercel.app</a>`,
+            `&copy; Global Youth Dialogue & Exchange (GYDE) &bull; <a href="https://www.thegyde.in" style="color: #047857; text-decoration: none;">thegyde.in</a>`,
             `</div></div></body></html>`,
             '',
             '.'
