@@ -780,8 +780,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not found locally, query cloud applications in real-time
-    if (!result.success && result.message && result.message.includes('User not found')) {
+    // If not successful locally, query cloud applications in real-time from thegyde.in
+    if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -795,8 +795,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-              if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...match };
-              else window.GYD_DATA.db.applications.unshift(match);
+              const adoptedPassword = (match.password && match.password.trim()) ? match.password.trim() : password;
+              const syncedMatch = { ...match, password: adoptedPassword };
+
+              if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
+              else window.GYD_DATA.db.applications.unshift(syncedMatch);
+
               if (typeof window.GYD_DATA.syncCommunityUsers === 'function') window.GYD_DATA.syncCommunityUsers();
               window.GYD_DATA.saveDatabase();
             }
@@ -1051,8 +1055,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not found locally, query cloud applications in real-time
-    if (!result.success && result.message && result.message.includes('User not found')) {
+    // If not successful locally, query cloud applications in real-time from thegyde.in
+    if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -1066,8 +1070,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-              if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...match };
-              else window.GYD_DATA.db.applications.unshift(match);
+              const adoptedPassword = (match.password && match.password.trim()) ? match.password.trim() : password;
+              const syncedMatch = { ...match, password: adoptedPassword };
+
+              if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
+              else window.GYD_DATA.db.applications.unshift(syncedMatch);
+
               if (typeof window.GYD_DATA.syncCommunityUsers === 'function') window.GYD_DATA.syncCommunityUsers();
               window.GYD_DATA.saveDatabase();
             }

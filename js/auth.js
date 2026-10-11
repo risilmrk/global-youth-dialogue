@@ -146,8 +146,8 @@ class AuthService {
           appMatch.status === 'Registered'
         );
         if (isApproved) {
-          const expectedAppPass = (appMatch.password || 'gyde2024').trim();
-          if (cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
+          const expectedAppPass = (appMatch.password || '').trim();
+          if (expectedAppPass && cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
             return { success: false, message: 'Incorrect password. Please verify your credentials.' };
           }
 
@@ -166,7 +166,9 @@ class AuthService {
             joinedDate: appMatch.date || new Date().toISOString().split('T')[0]
           };
           if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
-            window.GYD_DATA.db.users.push(user);
+            const uIdx = window.GYD_DATA.db.users.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
+            if (uIdx >= 0) window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
+            else window.GYD_DATA.db.users.push(user);
             if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
           }
         }
@@ -185,9 +187,13 @@ class AuthService {
     }
 
     // --- Password check ---
-    const userPass = (user.password || 'gyde2024').trim();
-    if (userPass !== cleanPassword && cleanPassword !== userPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
+    const userPass = (user.password || '').trim();
+    if (userPass && userPass !== cleanPassword && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
       return { success: false, message: 'Incorrect password. Please verify your credentials.' };
+    }
+    if (!user.password && cleanPassword) {
+      user.password = cleanPassword;
+      if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
     }
 
     // --- Account active? ---

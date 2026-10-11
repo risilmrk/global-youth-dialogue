@@ -119,6 +119,76 @@ let globalApplications = [
   }
 ];
 
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const GITHUB_REPO = 'riswanckd/global-youth-dialogue';
+const GITHUB_PATH = 'applications.json';
+
+async function fetchFromGitHub() {
+  if (!GITHUB_TOKEN) return;
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'User-Agent': 'GYDE-Platform',
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.content) {
+        const decoded = Buffer.from(data.content, 'base64').toString('utf8');
+        const parsed = JSON.parse(decoded);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          parsed.forEach(rApp => {
+            const idx = globalApplications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === (rApp.email || '').toLowerCase().trim()));
+            if (idx >= 0) {
+              globalApplications[idx] = { 
+                ...globalApplications[idx], 
+                ...rApp,
+                password: (rApp.password || globalApplications[idx].password || '')
+              };
+            } else {
+              globalApplications.unshift(rApp);
+            }
+          });
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+async function syncToGitHub() {
+  if (!GITHUB_TOKEN) return;
+  try {
+    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'User-Agent': 'GYDE-Platform',
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+    if (!getRes.ok) return;
+    const fileData = await getRes.json();
+    const sha = fileData.sha;
+
+    const contentBase64 = Buffer.from(JSON.stringify(globalApplications, null, 2), 'utf8').toString('base64');
+    await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${GITHUB_PATH}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'User-Agent': 'GYDE-Platform',
+        'Content-Type': 'application/json',
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      body: JSON.stringify({
+        message: 'data: sync member applications & approvals',
+        content: contentBase64,
+        sha
+      })
+    });
+  } catch (e) {}
+}
+
 function loadSavedApplications() {
   for (const filePath of [TMP_FILE, LOCAL_FILE]) {
     try {
@@ -126,11 +196,14 @@ function loadSavedApplications() {
         const raw = fs.readFileSync(filePath, 'utf8');
         const list = JSON.parse(raw);
         if (Array.isArray(list) && list.length > 0) {
-          // Merge with globalApplications
           list.forEach(rApp => {
-            const idx = globalApplications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase() === (rApp.email || '').toLowerCase()));
+            const idx = globalApplications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === (rApp.email || '').toLowerCase().trim()));
             if (idx >= 0) {
-              globalApplications[idx] = { ...globalApplications[idx], ...rApp };
+              globalApplications[idx] = { 
+                ...globalApplications[idx], 
+                ...rApp,
+                password: (rApp.password || globalApplications[idx].password || '')
+              };
             } else {
               globalApplications.unshift(rApp);
             }
@@ -147,10 +220,13 @@ function persistApplications() {
       fs.writeFileSync(filePath, JSON.stringify(globalApplications, null, 2), 'utf8');
     } catch (e) {}
   }
+  // Asynchronously sync to GitHub repository
+  syncToGitHub().catch(() => {});
 }
 
 // Initial load on start
 loadSavedApplications();
+fetchFromGitHub().catch(() => {});
 
 function sendAdminNotification(app) {
   const user = 'thegyde.verify@gmail.com';
@@ -328,6 +404,9 @@ module.exports = async function handler(req, res) {
   loadSavedApplications();
 
   if (req.method === 'GET') {
+    try {
+      await fetchFromGitHub();
+    } catch (e) {}
     return res.status(200).json(globalApplications);
   }
 
@@ -355,6 +434,9 @@ module.exports = async function handler(req, res) {
 
         if (match) {
           match.status = newStatus;
+          if (body.password && body.password.trim()) {
+            match.password = body.password.trim();
+          }
           persistApplications();
 
           // If approved, notify applicant via email
@@ -403,8 +485,14 @@ module.exports = async function handler(req, res) {
         const incomingStatus = newApp.status;
         const isExistingApproved = (existingStatus === 'Approved - Awaiting Registration' || existingStatus === 'Approved');
         const finalStatus = (isExistingApproved && incomingStatus === 'Pending') ? existingStatus : incomingStatus;
+        const finalPassword = (newApp.password && newApp.password.trim()) ? newApp.password.trim() : (globalApplications[existingIdx].password || '');
 
-        globalApplications[existingIdx] = { ...globalApplications[existingIdx], ...newApp, status: finalStatus };
+        globalApplications[existingIdx] = { 
+          ...globalApplications[existingIdx], 
+          ...newApp, 
+          status: finalStatus,
+          password: finalPassword
+        };
       } else {
         globalApplications.unshift(newApp);
       }

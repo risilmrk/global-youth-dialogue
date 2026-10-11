@@ -1552,7 +1552,7 @@ class DataService {
           };
           targetDb.users.push(newUser);
         } else {
-          if (!existingUser.password && app.password) existingUser.password = app.password;
+          if (app.password && app.password.trim()) existingUser.password = app.password.trim();
           if (!existingUser.country && app.country) existingUser.country = app.country;
           if (!existingUser.flag && app.flag) existingUser.flag = app.flag;
           if (!existingUser.bio && (app.motivation || app.debateExperience)) {
@@ -1824,9 +1824,16 @@ class DataService {
                 currentStatus === 'Rejected' || 
                 currentStatus === 'Declined'
               );
-              // Only overwrite status if remote has an updated decision, or if local was still Pending
               const finalStatus = (isLocalDecided && rApp.status === 'Pending') ? currentStatus : (rApp.status || currentStatus);
-              this.db.applications[idx] = { ...this.db.applications[idx], ...rApp, status: finalStatus };
+              const finalPassword = (rApp.password && rApp.password.trim()) 
+                ? rApp.password.trim() 
+                : ((this.db.applications[idx] && this.db.applications[idx].password) || '').trim();
+              this.db.applications[idx] = { 
+                ...this.db.applications[idx], 
+                ...rApp, 
+                status: finalStatus,
+                password: finalPassword 
+              };
             }
           });
           this.syncCommunityUsers();
@@ -2202,6 +2209,7 @@ class DataService {
           action: 'updateStatus',
           id: app.id,
           email: app.email,
+          password: app.password || '',
           status: 'Approved'
         })
       }).catch(err => console.warn('Could not sync approval to remote API', err));
