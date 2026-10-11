@@ -104,8 +104,8 @@ class AuthService {
     if (typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.users)) {
       const seedMatch = INITIAL_DATABASE.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
       if (seedMatch) {
-        const isDemo = ['coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org', 'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org'].includes(seedMatch.email.toLowerCase());
-        if (!isTrialDeleted || !isDemo) {
+        const isAdmin = seedMatch && (seedMatch.id === 'usr_admin_mubashir' || seedMatch.email.toLowerCase() === '3681mubashircp@gmail.com');
+        if (!isTrialDeleted || isAdmin) {
           if (!user) {
             user = JSON.parse(JSON.stringify(seedMatch));
             if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {

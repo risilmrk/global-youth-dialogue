@@ -4608,7 +4608,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const targetEl = document.getElementById(targetMap[targetName]);
     if (targetEl) targetEl.style.display = 'block';
 
-    if (targetName === 'dashboard' || targetName === 'applications') {
+    if (targetName === 'dashboard' || targetName === 'applications' || targetName === 'community') {
       if (dataService && typeof dataService.syncRemoteApplications === 'function') {
         dataService.syncRemoteApplications();
       }
@@ -6618,10 +6618,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = dataService.approveApplication(appId);
     if (app) {
       showToast(`Approved ${app.name}! An approval confirmation email has been dispatched to ${app.email}. They are now an official member.`, 'success');
+      // Reset community filters so newly approved member is immediately visible in The Community directory
+      window._coordCommunityFilterRole = 'all';
+      window._coordCommunityCountryFilter = 'all';
+      window._coordCommunitySearchQuery = '';
+      const sInput = document.getElementById('coordCommunitySearchInput');
+      if (sInput) sInput.value = '';
+      const cFilter = document.getElementById('coordCommunityCountryFilter');
+      if (cFilter) cFilter.value = 'all';
+
       renderCoordinatorPortal();
-      if (typeof renderCoordCommunityRoster === 'function') {
-        renderCoordCommunityRoster();
-      }
+      if (typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
+      if (typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
+      if (typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
     }
   };
 
@@ -7553,6 +7562,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('gyd_applied_email');
         localStorage.removeItem('gyd_pending_registration');
         localStorage.removeItem('gyd_otp_session');
+        localStorage.removeItem('gyd_user_votes');
+        localStorage.removeItem('gyd_ballot_votes');
+        localStorage.removeItem('gyd_deleted_community_emails');
       } catch (e) {}
 
       if (dataService && typeof dataService.clearTrialData === 'function') {
@@ -7562,36 +7574,46 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Restore session to the sole Administrator account
-      const adminUser = (dataService && typeof dataService.getUsers === 'function' ? dataService.getUsers() : []).find(u =>
-        (u.email && u.email.toLowerCase() === '3681mubashircp@gmail.com') || u.id === 'usr_admin_mubashir'
-      ) || {
+      const adminUser = {
         id: 'usr_admin_mubashir',
         name: 'Mubashir CP',
         email: '3681mubashircp@gmail.com',
         role: 'Coordinator',
         department: 'Executive Leadership & Administration',
-        country: 'Qatar',
-        flag: 'QA'
+        country: 'India',
+        flag: 'IN'
       };
       if (authService && typeof authService.saveSession === 'function') {
         authService.saveSession(adminUser);
       }
 
       closeModal('deleteTrialModal');
-      showToast('All demo and trial profiles and test submissions have been permanently deleted. Only Administrator Mubashir CP remains active.', 'success');
+      showToast('All demo and trial profiles, test applications, and submissions have been permanently deleted. Only Administrator Mubashir CP remains active.', 'success');
 
-      if (typeof renderCoordinatorPortal === 'function' && document.getElementById('viewCoordinator')?.style.display !== 'none') {
+      // Reset community filters
+      window._coordCommunityFilterRole = 'all';
+      window._coordCommunityCountryFilter = 'all';
+      window._coordCommunitySearchQuery = '';
+      const sInput = document.getElementById('coordCommunitySearchInput');
+      if (sInput) sInput.value = '';
+      const cFilter = document.getElementById('coordCommunityCountryFilter');
+      if (cFilter) cFilter.value = 'all';
+
+      // Re-render all coordinator views & community roster
+      if (typeof renderCoordinatorPortal === 'function') {
         renderCoordinatorPortal();
-        if (typeof renderCoordTeamList === 'function') renderCoordTeamList();
-        if (typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
-        if (typeof renderCoordFeedbackList === 'function') renderCoordFeedbackList();
-        if (typeof renderProfileView === 'function') renderProfileView('coordinator');
-      } else if (typeof renderPresenterPortal === 'function' && document.getElementById('viewPresenter')?.style.display !== 'none') {
-        renderPresenterPortal();
-      } else if (typeof renderMemberPortal === 'function') {
-        renderMemberPortal();
-        if (typeof renderMemberCommunityDirectory === 'function') renderMemberCommunityDirectory();
       }
+      if (typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
+      if (typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
+      if (typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
+      if (typeof renderCoordTopicsList === 'function') renderCoordTopicsList();
+      if (typeof renderCoordTopicBank === 'function') renderCoordTopicBank();
+      if (typeof renderCoordTeamList === 'function') renderCoordTeamList();
+      if (typeof renderCoordFeedbackList === 'function') renderCoordFeedbackList();
+      if (typeof renderProfileView === 'function') renderProfileView('coordinator');
+      if (typeof renderPresenterPortal === 'function') renderPresenterPortal();
+      if (typeof renderMemberPortal === 'function') renderMemberPortal();
+      if (typeof renderMemberCommunityDirectory === 'function') renderMemberCommunityDirectory();
     };
   }
 

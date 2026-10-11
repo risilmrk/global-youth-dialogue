@@ -1380,22 +1380,32 @@ class DataService {
         })();
 
         if (isTrialDeleted) {
-          // Permanently erase only synthetic demo accounts (@gyd.org)
-          // Retain the Administrator and all real registered members & approved applicants from the database
-          const demoMockEmails = ['coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org', 'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org'];
+          // Permanently erase all synthetic demo accounts and seed trial accounts
+          // Retain the Administrator and any real members who have been registered/approved
+          const seedTrialEmails = [
+            'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+            'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
+            'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+            'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+            'farhan.n@outlook.com', 'elena.rostova@debate.sg'
+          ];
           if (Array.isArray(parsed.users)) {
-            parsed.users = parsed.users.filter(u => !u.email || !demoMockEmails.includes(u.email.toLowerCase().trim()));
+            parsed.users = parsed.users.filter(u => {
+              const em = (u.email || '').toLowerCase().trim();
+              if (em === '3681mubashircp@gmail.com' || u.id === 'usr_admin_mubashir') return true;
+              return !seedTrialEmails.includes(em);
+            });
           } else {
             parsed.users = [];
           }
 
-          // Retain membership proposals
-          if (!Array.isArray(parsed.applications) || parsed.applications.length === 0) {
-            parsed.applications = JSON.parse(JSON.stringify(INITIAL_DATABASE.applications || []));
+          // Do NOT re-inject seed applications when trial data is deleted!
+          if (!Array.isArray(parsed.applications)) {
+            parsed.applications = [];
           } else {
-            INITIAL_DATABASE.applications.forEach(initA => {
-              const exists = parsed.applications.some(a => a.email && a.email.toLowerCase() === initA.email.toLowerCase());
-              if (!exists) parsed.applications.push(JSON.parse(JSON.stringify(initA)));
+            parsed.applications = parsed.applications.filter(a => {
+              const em = (a.email || '').toLowerCase().trim();
+              return !seedTrialEmails.includes(em);
             });
           }
         } else {
@@ -1433,6 +1443,8 @@ class DataService {
       localStorage.removeItem('gyd_user_votes');
       localStorage.removeItem('gyd_ballot_votes');
       localStorage.removeItem('gyd_pending_registration');
+      localStorage.removeItem('gyd_applied_email');
+      localStorage.removeItem('gyd_deleted_community_emails');
     } catch (e) {}
     this.db = JSON.parse(JSON.stringify(INITIAL_DATABASE));
     this.syncCommunityUsers();
@@ -1449,19 +1461,55 @@ class DataService {
       localStorage.removeItem('gyd_ballot_votes');
       localStorage.removeItem('gyd_pending_registration');
       localStorage.removeItem('gyd_applied_email');
+      localStorage.removeItem('gyd_deleted_community_emails');
     } catch (e) {}
 
-    // Reset database to initial curated state
-    this.db = JSON.parse(JSON.stringify(INITIAL_DATABASE));
-    
-    // Retain verified database applications
-    this.db.applications = JSON.parse(JSON.stringify(INITIAL_DATABASE.applications || []));
-    this.db.presenterApplications = [];
-    if (this.db.feedback) this.db.feedback = [];
-    
-    // Ensure admin and all real registered members from INITIAL_DATABASE and applications are present
-    this.syncCommunityUsers();
+    // Reset database: preserve ONLY the Chief Administrator account
+    const adminUser = {
+      id: 'usr_admin_mubashir',
+      name: 'Mubashir CP',
+      email: '3681mubashircp@gmail.com',
+      password: '368136',
+      role: 'Coordinator',
+      department: 'Executive Leadership & Administration',
+      country: 'India',
+      flag: 'IN',
+      bio: 'Executive Director & Chief Platform Administrator, Global Youth Dialogue & Exchange (GYDE).',
+      interests: ['Global Affairs', 'Governance & Society', 'Technology & AI', 'Education'],
+      status: 'active',
+      joinedDate: '2024-01-01'
+    };
+
+    this.db = {
+      users: [adminUser],
+      applications: [],
+      presenterApplications: [],
+      announcements: [],
+      notifications: [],
+      countryReps: JSON.parse(JSON.stringify(INITIAL_DATABASE.countryReps || [])),
+      mediaKits: JSON.parse(JSON.stringify(INITIAL_DATABASE.mediaKits || [])),
+      presentations: [],
+      sessions: [],
+      writings: [],
+      topics: [],
+      topicBank: JSON.parse(JSON.stringify(INITIAL_DATABASE.topicBank || [])),
+      categories: JSON.parse(JSON.stringify(INITIAL_DATABASE.categories || [])),
+      feedback: [],
+      deletedUserEmails: []
+    };
+
     this.saveDatabase();
+
+    // Immediately purge applications on backend server API
+    try {
+      const apiUrl = this.getApplicationsApiUrl();
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'clearTrialData' })
+      }).catch(err => console.warn('Could not sync clearTrialData to API:', err));
+    } catch (e) {}
+
     return true;
   }
 
@@ -1471,6 +1519,10 @@ class DataService {
     if (!Array.isArray(targetDb.users)) {
       targetDb.users = [];
     }
+
+    const isTrialDeleted = (function() {
+      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
+    })();
 
     // Load persistent deleted emails tombstone
     let deletedEmails = Array.isArray(targetDb.deletedUserEmails) ? targetDb.deletedUserEmails : [];
@@ -1490,17 +1542,26 @@ class DataService {
       'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org'
     ];
 
+    const seedTrialEmails = [
+      'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+      'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
+      'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+      'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+      'farhan.n@outlook.com', 'elena.rostova@debate.sg'
+    ];
+
     // Filter out synthetic mock accounts AND explicitly deleted members
     targetDb.users = targetDb.users.filter(u => {
       const em = (u.email || '').toLowerCase().trim();
       if (!em) return true;
       if (demoMockEmails.includes(em)) return false;
       if (deletedEmails.includes(em)) return false;
+      if (isTrialDeleted && em !== '3681mubashircp@gmail.com' && seedTrialEmails.includes(em)) return false;
       return true;
     });
 
-    // 1. Ensure all curated users from INITIAL_DATABASE.users exist UNLESS deleted
-    if (INITIAL_DATABASE && Array.isArray(INITIAL_DATABASE.users)) {
+    // 1. Ensure all curated users from INITIAL_DATABASE.users exist UNLESS trial data was deleted
+    if (!isTrialDeleted && INITIAL_DATABASE && Array.isArray(INITIAL_DATABASE.users)) {
       INITIAL_DATABASE.users.forEach(initU => {
         const cleanEmail = (initU.email || '').toLowerCase().trim();
         if (deletedEmails.includes(cleanEmail)) return; // Exclude deleted members
@@ -1519,10 +1580,17 @@ class DataService {
           }
         }
       });
+    } else {
+      // Ensure Chief Administrator always exists
+      const admin = targetDb.users.find(u => u.id === 'usr_admin_mubashir' || (u.email && u.email.toLowerCase().trim() === '3681mubashircp@gmail.com'));
+      if (!admin && INITIAL_DATABASE && Array.isArray(INITIAL_DATABASE.users)) {
+        const initAdmin = INITIAL_DATABASE.users.find(u => u.id === 'usr_admin_mubashir' || u.email === '3681mubashircp@gmail.com');
+        if (initAdmin) targetDb.users.unshift(JSON.parse(JSON.stringify(initAdmin)));
+      }
     }
 
     // 2. Synchronize from applications (Approved or Registered) UNLESS deleted
-    const apps = Array.isArray(targetDb.applications) ? targetDb.applications : (INITIAL_DATABASE.applications || []);
+    const apps = Array.isArray(targetDb.applications) ? targetDb.applications : (isTrialDeleted ? [] : (INITIAL_DATABASE.applications || []));
     apps.forEach(app => {
       const cleanEmail = (app.email || '').toLowerCase().trim();
       if (!cleanEmail || deletedEmails.includes(cleanEmail)) return; // Exclude deleted members
@@ -1544,7 +1612,7 @@ class DataService {
             country: app.country || 'Global',
             flag: app.flag || 'INT',
             bio: app.motivation || app.debateExperience || `Verified member representing ${app.country || 'Global'}.`,
-            interests: app.interests || ['Global Affairs'],
+            interests: Array.isArray(app.interests) && app.interests.length ? app.interests : ['Global Affairs'],
             debateExperience: app.debateExperience || '',
             motivation: app.motivation || '',
             status: 'active',
@@ -1552,6 +1620,9 @@ class DataService {
           };
           targetDb.users.push(newUser);
         } else {
+          existingUser.role = existingUser.role || 'Member';
+          existingUser.status = 'active';
+          if (app.name && !existingUser.name) existingUser.name = app.name;
           if (app.password && app.password.trim()) existingUser.password = app.password.trim();
           if (!existingUser.country && app.country) existingUser.country = app.country;
           if (!existingUser.flag && app.flag) existingUser.flag = app.flag;
@@ -1618,6 +1689,8 @@ class DataService {
       const email = (u.email || '').toLowerCase().trim();
       if (!email || seenEmails.has(email) || deletedEmails.includes(email)) return;
       seenEmails.add(email);
+      u.role = u.role || 'Member';
+      u.status = u.status || 'active';
       uniqueUsers.push(u);
     });
 
@@ -1788,8 +1861,11 @@ class DataService {
   getWritings() { return this.db.writings; }
   getFeedback() { return this.db.feedback; }
   getApplications() {
-    if (!this.db.applications || !Array.isArray(this.db.applications) || this.db.applications.length === 0) {
-      this.db.applications = JSON.parse(JSON.stringify(INITIAL_DATABASE.applications || []));
+    const isTrialDeleted = (function() {
+      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
+    })();
+    if (!this.db.applications || !Array.isArray(this.db.applications)) {
+      this.db.applications = isTrialDeleted ? [] : JSON.parse(JSON.stringify(INITIAL_DATABASE.applications || []));
       this.saveDatabase();
     }
     return this.db.applications;
@@ -1797,7 +1873,12 @@ class DataService {
 
   getApplicationsApiUrl() {
     if (typeof window !== 'undefined' && window.location && window.location.origin) {
-      if (window.location.origin.includes('vercel.app') || window.location.origin.includes('thegyde.in')) {
+      if (
+        window.location.origin.includes('vercel.app') || 
+        window.location.origin.includes('thegyde.in') ||
+        window.location.origin.includes('localhost') ||
+        window.location.origin.includes('127.0.0.1')
+      ) {
         return '/api/applications';
       }
     }
@@ -1810,10 +1891,28 @@ class DataService {
       const resp = await fetch(apiUrl);
       if (resp.ok) {
         const remoteApps = await resp.json();
-        if (Array.isArray(remoteApps) && remoteApps.length > 0) {
+        if (Array.isArray(remoteApps)) {
           if (!Array.isArray(this.db.applications)) this.db.applications = [];
+
+          const isTrialDeleted = (function() {
+            try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
+          })();
+
+          const seedTrialEmails = [
+            'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com', 
+            'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com', 
+            'farhan.n@outlook.com', 'sarah.vandijk@edu.nl', 
+            'amina.kuwari@youth.qa', 'kofi.mensah@ug.edu.gh', 
+            'elena.rostova@debate.sg'
+          ];
+
           remoteApps.forEach(rApp => {
-            const idx = this.db.applications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === (rApp.email || '').toLowerCase().trim()));
+            const cleanRAppEmail = (rApp.email || '').toLowerCase().trim();
+            if (isTrialDeleted && seedTrialEmails.includes(cleanRAppEmail)) {
+              return;
+            }
+
+            const idx = this.db.applications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === cleanRAppEmail));
             if (idx === -1) {
               this.db.applications.unshift(rApp);
             } else {
@@ -2120,26 +2219,39 @@ class DataService {
   // Applications Operations
   submitApplication(appData) {
     const cleanEmail = (appData.email || '').trim().toLowerCase();
+
+    // If applicant was previously in deleted tombstone list, un-tombstone them
+    if (Array.isArray(this.db.deletedUserEmails)) {
+      this.db.deletedUserEmails = this.db.deletedUserEmails.filter(e => e !== cleanEmail);
+    }
+    try {
+      let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+      if (Array.isArray(localDeleted)) {
+        localDeleted = localDeleted.filter(e => e !== cleanEmail);
+        localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+      }
+    } catch (e) {}
+
     const newApp = {
       id: appData.id || ('app_' + Date.now().toString(36)),
-      name: appData.name,
+      name: (appData.name || '').trim(),
       firstName: appData.firstName || (appData.name ? appData.name.split(' ')[0] : ''),
       lastName: appData.lastName || (appData.name ? appData.name.split(' ').slice(1).join(' ') : ''),
       email: cleanEmail,
       password: appData.password || '',
-      country: appData.country,
+      country: (appData.country || 'Global').trim(),
       flag: appData.flag || 'INT',
-      interests: Array.isArray(appData.interests) ? appData.interests : (appData.interests ? [appData.interests] : []),
+      interests: Array.isArray(appData.interests) ? appData.interests : (appData.interests ? [appData.interests] : ['Global Affairs']),
       debateExperience: appData.debateExperience || '',
       motivation: appData.motivation || '',
       status: 'Pending',
       emailVerified: true,
-      date: new Date().toISOString().split('T')[0]
+      date: appData.date || new Date().toISOString().split('T')[0]
     };
     if (!Array.isArray(this.db.applications)) this.db.applications = [];
     const existingIdx = this.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanEmail);
     if (existingIdx >= 0) {
-      this.db.applications[existingIdx] = { ...this.db.applications[existingIdx], ...newApp };
+      this.db.applications[existingIdx] = { ...this.db.applications[existingIdx], ...newApp, id: this.db.applications[existingIdx].id || newApp.id };
     } else {
       this.db.applications.unshift(newApp);
     }
@@ -2164,13 +2276,31 @@ class DataService {
   }
 
   approveApplication(appId) {
-    const app = this.db.applications.find(a => a.id === appId);
+    if (!appId) return null;
+    if (!Array.isArray(this.db.applications)) this.db.applications = [];
+
+    const app = this.db.applications.find(a => 
+      (a.id && String(a.id).trim() === String(appId).trim()) || 
+      (a.email && a.email.toLowerCase().trim() === String(appId).toLowerCase().trim())
+    );
     if (!app) return null;
 
     app.status = 'Approved';
-
-    // Activate/create member in users list so they can log in immediately
     const cleanEmail = (app.email || '').toLowerCase().trim();
+
+    // Immediately remove email from any deleted/tombstone list so syncCommunityUsers includes them
+    if (Array.isArray(this.db.deletedUserEmails)) {
+      this.db.deletedUserEmails = this.db.deletedUserEmails.filter(e => e !== cleanEmail);
+    }
+    try {
+      let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+      if (Array.isArray(localDeleted)) {
+        localDeleted = localDeleted.filter(e => e !== cleanEmail);
+        localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+      }
+    } catch (e) {}
+
+    // Activate/create member in users list so they appear in community menu immediately
     if (!Array.isArray(this.db.users)) this.db.users = [];
     let userIndex = this.db.users.findIndex(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
     const activeUser = {
@@ -2183,7 +2313,7 @@ class DataService {
       country: app.country || 'Global',
       flag: app.flag || 'INT',
       bio: app.motivation || app.debateExperience || `Verified member representing ${app.country || 'Global'}.`,
-      interests: app.interests || ['Global Affairs'],
+      interests: Array.isArray(app.interests) && app.interests.length ? app.interests : ['Global Affairs'],
       debateExperience: app.debateExperience || '',
       motivation: app.motivation || '',
       status: 'active',
@@ -2191,7 +2321,7 @@ class DataService {
     };
 
     if (userIndex >= 0) {
-      this.db.users[userIndex] = { ...this.db.users[userIndex], ...activeUser, id: this.db.users[userIndex].id };
+      this.db.users[userIndex] = { ...this.db.users[userIndex], ...activeUser, id: this.db.users[userIndex].id || activeUser.id };
     } else {
       this.db.users.unshift(activeUser);
     }
@@ -2208,6 +2338,8 @@ class DataService {
         body: JSON.stringify({
           action: 'updateStatus',
           id: app.id,
+          name: app.name,
+          country: app.country,
           email: app.email,
           password: app.password || '',
           status: 'Approved'

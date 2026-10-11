@@ -190,24 +190,14 @@ async function syncToGitHub() {
 }
 
 function loadSavedApplications() {
-  for (const filePath of [TMP_FILE, LOCAL_FILE]) {
+  for (const filePath of [LOCAL_FILE, TMP_FILE]) {
     try {
       if (fs.existsSync(filePath)) {
         const raw = fs.readFileSync(filePath, 'utf8');
         const list = JSON.parse(raw);
-        if (Array.isArray(list) && list.length > 0) {
-          list.forEach(rApp => {
-            const idx = globalApplications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === (rApp.email || '').toLowerCase().trim()));
-            if (idx >= 0) {
-              globalApplications[idx] = { 
-                ...globalApplications[idx], 
-                ...rApp,
-                password: (rApp.password || globalApplications[idx].password || '')
-              };
-            } else {
-              globalApplications.unshift(rApp);
-            }
-          });
+        if (Array.isArray(list)) {
+          globalApplications = list;
+          return;
         }
       }
     } catch (e) {}
@@ -418,6 +408,16 @@ module.exports = async function handler(req, res) {
       }
       body = body || {};
 
+      // Handle Clear All Trial Data action
+      if (body.action === 'clearTrialData') {
+        globalApplications = [];
+        persistApplications();
+        return res.status(200).json({
+          success: true,
+          message: 'All trial applications deleted from server.'
+        });
+      }
+
       // Handle Status Updates from Coordinator Dashboard (e.g. Approved / Rejected)
       const isExplicitStatusUpdate = (body.action === 'updateStatus' || body.action === 'update');
       const isStatusOnlyUpdate = (!body.name && body.status && (body.id || body.email));
@@ -448,6 +448,27 @@ module.exports = async function handler(req, res) {
             success: true,
             message: `Application status updated to "${newStatus}"`,
             application: match
+          });
+        } else if (targetEmail) {
+          const createdApp = {
+            id: targetId || ('app_' + Date.now().toString(36)),
+            name: body.name || 'Member',
+            email: targetEmail,
+            password: body.password || '',
+            country: body.country || 'Global',
+            flag: body.flag || 'INT',
+            status: newStatus,
+            date: new Date().toISOString().split('T')[0]
+          };
+          globalApplications.unshift(createdApp);
+          persistApplications();
+          if (newStatus === 'Approved') {
+            sendApplicantApprovalNotification(createdApp).catch(() => {});
+          }
+          return res.status(200).json({
+            success: true,
+            message: `Application status recorded as "${newStatus}"`,
+            application: createdApp
           });
         }
         return res.status(404).json({ error: 'Application not found to update.' });
