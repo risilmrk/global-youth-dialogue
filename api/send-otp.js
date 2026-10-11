@@ -16,9 +16,9 @@ function getConfig() {
   let config = {
     smtp_host: 'smtp.gmail.com',
     smtp_port: 465,
-    smtp_user: 'riswankckd@gmail.com',
-    smtp_pass: 'avkfjotmlvwkavgv',
-    from_email: 'riswankckd@gmail.com',
+    smtp_user: 'thegyde.verify@gmail.com',
+    smtp_pass: 'nwhnmkersbiwwrry',
+    from_email: 'thegyde.verify@gmail.com',
     from_name: 'Global Youth Dialogue & Exchange (GYDE)'
   };
 

@@ -153,8 +153,8 @@ function persistApplications() {
 loadSavedApplications();
 
 function sendAdminNotification(app) {
-  const user = 'riswankckd@gmail.com';
-  const pass = 'avkfjotmlvwkavgv';
+  const user = 'thegyde.verify@gmail.com';
+  const pass = 'nwhnmkersbiwwrry';
   const host = 'smtp.gmail.com';
   const port = 465;
 
@@ -232,8 +232,8 @@ function sendAdminNotification(app) {
 }
 
 function sendApplicantApprovalNotification(app) {
-  const user = 'riswankckd@gmail.com';
-  const pass = 'avkfjotmlvwkavgv';
+  const user = 'thegyde.verify@gmail.com';
+  const pass = 'nwhnmkersbiwwrry';
   const host = 'smtp.gmail.com';
   const port = 465;
 
