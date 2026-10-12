@@ -210,13 +210,24 @@ class AuthService {
             return { success: false, message: 'Incorrect password. Please verify your credentials.' };
           }
 
+          const isPresAppRole = (
+            appMatch.role === 'Presenter' ||
+            appMatch.role === 'Speaker' ||
+            appMatch.isApprovedPresenter === true ||
+            (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.presenterApplications) && 
+              window.GYD_DATA.db.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved')) ||
+            (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users) &&
+              window.GYD_DATA.db.users.some(u => u.email && u.email.toLowerCase().trim() === cleanEmail && (u.role === 'Presenter' || u.role === 'Speaker' || u.isApprovedPresenter === true)))
+          );
+
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
             password: expectedAppPass || cleanPassword,
-            role: 'Member',
-            department: `Youth Delegation • ${appMatch.country || 'Global'}`,
+            role: isPresAppRole ? 'Presenter' : (appMatch.role || 'Member'),
+            isApprovedPresenter: isPresAppRole,
+            department: isPresAppRole ? `Academic Delegation • ${appMatch.country || 'Global'}` : `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
             flag: appMatch.flag || 'INT',
             bio: appMatch.motivation || appMatch.debateExperience || `Verified member representing ${appMatch.country || 'Global'}.`,
@@ -226,8 +237,16 @@ class AuthService {
           };
           if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
             const uIdx = window.GYD_DATA.db.users.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-            if (uIdx >= 0) window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
-            else window.GYD_DATA.db.users.push(user);
+            if (uIdx >= 0) {
+              const existingRole = window.GYD_DATA.db.users[uIdx].role;
+              if (existingRole === 'Presenter' || existingRole === 'Speaker' || window.GYD_DATA.db.users[uIdx].isApprovedPresenter) {
+                user.role = 'Presenter';
+                user.isApprovedPresenter = true;
+              }
+              window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
+            } else {
+              window.GYD_DATA.db.users.push(user);
+            }
             if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
           }
         }
@@ -259,7 +278,9 @@ class AuthService {
       user.role === 'Speaker' ||
       user.isApprovedPresenter === true ||
       (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.presenterApplications) && 
-        window.GYD_DATA.db.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved'))
+        window.GYD_DATA.db.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved')) ||
+      (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.applications) && 
+        window.GYD_DATA.db.applications.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && (a.role === 'Presenter' || a.isApprovedPresenter === true)))
     );
     if (hasApprovedPresApp && user.role !== 'Coordinator' && user.role !== 'Admin' && cleanEmail !== '3681mubashircp@gmail.com') {
       user.role = 'Presenter';
@@ -401,13 +422,24 @@ class AuthService {
           if (expectedAppPass && cleanPassword !== expectedAppPass) {
             return { success: false, message: 'Invalid password.' };
           }
+          const isPresAppRoleLegacy = (
+            appMatch.role === 'Presenter' ||
+            appMatch.role === 'Speaker' ||
+            appMatch.isApprovedPresenter === true ||
+            (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.presenterApplications) && 
+              window.GYD_DATA.db.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved')) ||
+            (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users) &&
+              window.GYD_DATA.db.users.some(u => u.email && u.email.toLowerCase().trim() === cleanEmail && (u.role === 'Presenter' || u.role === 'Speaker' || u.isApprovedPresenter === true)))
+          );
+
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
             password: expectedAppPass || cleanPassword,
-            role: 'Member',
-            department: `Youth Delegation • ${appMatch.country || 'Global'}`,
+            role: isPresAppRoleLegacy ? 'Presenter' : (appMatch.role || 'Member'),
+            isApprovedPresenter: isPresAppRoleLegacy,
+            department: isPresAppRoleLegacy ? `Academic Delegation • ${appMatch.country || 'Global'}` : `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
             flag: appMatch.flag || 'INT',
             bio: appMatch.motivation || appMatch.debateExperience || `Verified member representing ${appMatch.country || 'Global'}.`,
@@ -417,8 +449,16 @@ class AuthService {
           };
           if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
             const uIdx = window.GYD_DATA.db.users.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-            if (uIdx >= 0) window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
-            else window.GYD_DATA.db.users.push(user);
+            if (uIdx >= 0) {
+              const existingRole = window.GYD_DATA.db.users[uIdx].role;
+              if (existingRole === 'Presenter' || existingRole === 'Speaker' || window.GYD_DATA.db.users[uIdx].isApprovedPresenter) {
+                user.role = 'Presenter';
+                user.isApprovedPresenter = true;
+              }
+              window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
+            } else {
+              window.GYD_DATA.db.users.push(user);
+            }
             if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
           }
         }

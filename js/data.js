@@ -1446,14 +1446,22 @@ class DataService {
 
       if (isRegisteredOrApproved) {
         let existingUser = targetDb.users.find(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+        const isPres = (
+          app.role === 'Presenter' || 
+          app.role === 'Speaker' || 
+          app.isApprovedPresenter === true ||
+          (Array.isArray(targetDb.presenterApplications) && targetDb.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved'))
+        );
+
         if (!existingUser) {
           const newUser = {
             id: 'usr_' + (app.id ? app.id.replace('app_', '') : Date.now().toString(36)),
             name: app.name,
             email: cleanEmail,
             password: app.password || 'gyde2024',
-            role: 'Member',
-            department: `Youth Delegation • ${app.country || 'Global'}`,
+            role: isPres ? 'Presenter' : (app.role || 'Member'),
+            isApprovedPresenter: isPres,
+            department: isPres ? `Academic Delegation • ${app.country || 'Global'}` : `Youth Delegation • ${app.country || 'Global'}`,
             country: app.country || 'Global',
             flag: app.flag || 'INT',
             bio: app.motivation || app.debateExperience || `Verified member representing ${app.country || 'Global'}.`,
@@ -1465,7 +1473,12 @@ class DataService {
           };
           targetDb.users.push(newUser);
         } else {
-          existingUser.role = existingUser.role || 'Member';
+          if (isPres) {
+            existingUser.role = 'Presenter';
+            existingUser.isApprovedPresenter = true;
+          } else {
+            existingUser.role = existingUser.role || app.role || 'Member';
+          }
           existingUser.status = 'active';
           if (app.name && !existingUser.name) existingUser.name = app.name;
           if (app.password && app.password.trim()) existingUser.password = app.password.trim();
@@ -1594,6 +1607,90 @@ class DataService {
     const user = this.db.users.find(u => u.id === userId);
     if (!user) return null;
     user.role = newRole;
+    const cleanEmail = (user.email || '').toLowerCase().trim();
+
+    if (newRole === 'Presenter' || newRole === 'Speaker') {
+      user.role = 'Presenter';
+      user.isApprovedPresenter = true;
+
+      // 1. Mark presenter application as Approved if exists
+      if (Array.isArray(this.db.presenterApplications)) {
+        const pApp = this.db.presenterApplications.find(p => 
+          (p.userId && p.userId === userId) || (p.email && p.email.toLowerCase().trim() === cleanEmail)
+        );
+        if (pApp) {
+          pApp.status = 'Approved';
+        }
+      }
+
+      // 2. Mark member application as Presenter
+      if (Array.isArray(this.db.applications)) {
+        const mApp = this.db.applications.find(a => a.email && a.email.toLowerCase().trim() === cleanEmail);
+        if (mApp) {
+          mApp.role = 'Presenter';
+          mApp.isApprovedPresenter = true;
+        }
+      }
+
+      // 3. Immediately sync to remote API
+      try {
+        const apiUrl = this.getApplicationsApiUrl();
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updateUserRole',
+            userId: user.id,
+            email: cleanEmail,
+            role: 'Presenter',
+            isApprovedPresenter: true
+          })
+        }).catch(() => {});
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updatePresenterStatus',
+            email: cleanEmail,
+            status: 'Approved'
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    } else if (newRole === 'Member') {
+      user.isApprovedPresenter = false;
+      if (Array.isArray(this.db.applications)) {
+        const mApp = this.db.applications.find(a => a.email && a.email.toLowerCase().trim() === cleanEmail);
+        if (mApp) {
+          mApp.role = 'Member';
+          mApp.isApprovedPresenter = false;
+        }
+      }
+      try {
+        const apiUrl = this.getApplicationsApiUrl();
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updateUserRole',
+            userId: user.id,
+            email: cleanEmail,
+            role: 'Member',
+            isApprovedPresenter: false
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    // Sync active session if currently logged-in user is this user
+    if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
+      const activeUser = window.GYD_AUTH.getCurrentUser();
+      if (activeUser && (activeUser.id === user.id || (activeUser.email && activeUser.email.toLowerCase().trim() === cleanEmail))) {
+        activeUser.role = user.role;
+        activeUser.isApprovedPresenter = user.isApprovedPresenter;
+        window.GYD_AUTH.saveSession(activeUser);
+      }
+    }
+
     this.saveDatabase();
     return user;
   }
@@ -1874,9 +1971,38 @@ class DataService {
                 password: finalPassword 
               };
             }
+
+            if (rApp.role === 'Presenter' || rApp.isApprovedPresenter === true) {
+              if (Array.isArray(this.db.users)) {
+                const u = this.db.users.find(u => u.email && u.email.toLowerCase().trim() === cleanRAppEmail);
+                if (u) {
+                  u.role = 'Presenter';
+                  u.isApprovedPresenter = true;
+                }
+              }
+              if (Array.isArray(this.db.presenterApplications)) {
+                const pa = this.db.presenterApplications.find(p => p.email && p.email.toLowerCase().trim() === cleanRAppEmail);
+                if (pa) {
+                  pa.status = 'Approved';
+                }
+              }
+            }
           });
           this.syncCommunityUsers();
           this.saveDatabase();
+
+          // If active user role changed, immediately sync their active session
+          if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
+            const curUser = window.GYD_AUTH.getCurrentUser();
+            if (curUser && curUser.email) {
+              const matchedU = (this.db.users || []).find(u => u.email && u.email.toLowerCase().trim() === curUser.email.toLowerCase().trim());
+              if (matchedU && matchedU.role && (matchedU.role !== curUser.role || matchedU.isApprovedPresenter !== curUser.isApprovedPresenter)) {
+                curUser.role = matchedU.role;
+                curUser.isApprovedPresenter = matchedU.isApprovedPresenter || (matchedU.role === 'Presenter');
+                window.GYD_AUTH.saveSession(curUser);
+              }
+            }
+          }
           if (typeof window.renderCoordDashboardContent === 'function') window.renderCoordDashboardContent();
           else if (typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
 

@@ -512,6 +512,42 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: false, message: 'No matching application to update password.' });
       }
 
+      // Handle User Role Updates from Community Roster (action: 'updateUserRole')
+      if (body.action === 'updateUserRole') {
+        const targetEmail = (body.email || '').trim().toLowerCase();
+        const newRole = body.role || 'Member';
+        const isApprovedPres = (newRole === 'Presenter' || body.isApprovedPresenter === true);
+
+        const memberMatch = globalApplications.find(a => 
+          a.type !== 'presenter' && 
+          !String(a.id || '').startsWith('papp_') &&
+          a.email && 
+          a.email.toLowerCase().trim() === targetEmail
+        );
+        if (memberMatch) {
+          memberMatch.role = newRole;
+          memberMatch.isApprovedPresenter = isApprovedPres;
+        }
+
+        if (isApprovedPres) {
+          const presMatch = globalApplications.find(a => 
+            (a.type === 'presenter' || String(a.id || '').startsWith('papp_')) &&
+            a.email && 
+            a.email.toLowerCase().trim() === targetEmail
+          );
+          if (presMatch) {
+            presMatch.status = 'Approved';
+          }
+        }
+
+        await persistApplications();
+        return res.status(200).json({
+          success: true,
+          message: `User role updated to ${newRole}`,
+          application: memberMatch
+        });
+      }
+
       // Handle Presenter Application Submission (action: 'submitPresenterApplication' or type: 'presenter')
       if (body.action === 'submitPresenterApplication' || (body.type === 'presenter' && body.action !== 'updatePresenterStatus' && body.action !== 'updateStatus') || (body.id && String(body.id).startsWith('papp_') && body.action !== 'updatePresenterStatus' && body.action !== 'updateStatus')) {
         const name = (body.name || '').trim();

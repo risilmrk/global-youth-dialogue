@@ -808,7 +808,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.ok) {
           const remoteApps = await res.json();
           const cleanInput = email.toLowerCase().trim();
-          const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput);
+          const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput && a.type !== 'presenter' && !String(a.id || '').startsWith('papp_'));
+          const presMatch = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput && (a.type === 'presenter' || String(a.id || '').startsWith('papp_')));
+
+          if (presMatch && window.GYD_DATA && window.GYD_DATA.db) {
+            if (!Array.isArray(window.GYD_DATA.db.presenterApplications)) window.GYD_DATA.db.presenterApplications = [];
+            const pIdx = window.GYD_DATA.db.presenterApplications.findIndex(p => p.id === presMatch.id || (p.email && p.email.toLowerCase().trim() === cleanInput));
+            if (pIdx >= 0) window.GYD_DATA.db.presenterApplications[pIdx] = { ...window.GYD_DATA.db.presenterApplications[pIdx], ...presMatch };
+            else window.GYD_DATA.db.presenterApplications.unshift(presMatch);
+          }
+
           if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
@@ -816,7 +825,17 @@ document.addEventListener('DOMContentLoaded', () => {
               const adoptedPassword = (match.password && match.password.trim() && match.password.trim() !== 'gyde2024') 
                 ? match.password.trim() 
                 : password;
-              const syncedMatch = { ...match, password: adoptedPassword };
+              const isPresRole = (
+                match.role === 'Presenter' || 
+                match.isApprovedPresenter === true || 
+                (presMatch && presMatch.status === 'Approved')
+              );
+              const syncedMatch = { 
+                ...match, 
+                password: adoptedPassword,
+                role: isPresRole ? 'Presenter' : (match.role || 'Member'),
+                isApprovedPresenter: isPresRole
+              };
 
               if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
               else window.GYD_DATA.db.applications.unshift(syncedMatch);
@@ -1052,7 +1071,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.ok) {
           const remoteApps = await res.json();
           const cleanInput = email.toLowerCase().trim();
-          const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput);
+          const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput && a.type !== 'presenter' && !String(a.id || '').startsWith('papp_'));
+          const presMatch = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput && (a.type === 'presenter' || String(a.id || '').startsWith('papp_')));
+
+          if (presMatch && window.GYD_DATA && window.GYD_DATA.db) {
+            if (!Array.isArray(window.GYD_DATA.db.presenterApplications)) window.GYD_DATA.db.presenterApplications = [];
+            const pIdx = window.GYD_DATA.db.presenterApplications.findIndex(p => p.id === presMatch.id || (p.email && p.email.toLowerCase().trim() === cleanInput));
+            if (pIdx >= 0) window.GYD_DATA.db.presenterApplications[pIdx] = { ...window.GYD_DATA.db.presenterApplications[pIdx], ...presMatch };
+            else window.GYD_DATA.db.presenterApplications.unshift(presMatch);
+          }
+
           if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
@@ -1060,7 +1088,17 @@ document.addEventListener('DOMContentLoaded', () => {
               const adoptedPassword = (match.password && match.password.trim() && match.password.trim() !== 'gyde2024') 
                 ? match.password.trim() 
                 : password;
-              const syncedMatch = { ...match, password: adoptedPassword };
+              const isPresRole = (
+                match.role === 'Presenter' || 
+                match.isApprovedPresenter === true || 
+                (presMatch && presMatch.status === 'Approved')
+              );
+              const syncedMatch = { 
+                ...match, 
+                password: adoptedPassword,
+                role: isPresRole ? 'Presenter' : (match.role || 'Member'),
+                isApprovedPresenter: isPresRole
+              };
 
               if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
               else window.GYD_DATA.db.applications.unshift(syncedMatch);
@@ -2060,16 +2098,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const user = authService.getCurrentUser();
     if (!user) return;
 
-    const isAccredited = user.role === 'Presenter' || user.role === 'Speaker';
+    const isAccredited = (
+      user.role === 'Presenter' || 
+      user.role === 'Speaker' || 
+      user.isApprovedPresenter === true
+    );
     const app = dataService.getMemberPresenterApplication(user.id, user.email);
     const isApproved = isAccredited || (app && app.status === 'Approved');
     const isPending = !isApproved && (app && app.status === 'Pending');
 
     if (isApproved) {
-      if (user.role !== 'Presenter') {
+      if (user.role !== 'Presenter' || !user.isApprovedPresenter) {
         user.role = 'Presenter';
         user.isApprovedPresenter = true;
         authService.saveSession(user);
+      }
+      if (app && app.status !== 'Approved') {
+        app.status = 'Approved';
+        dataService.saveDatabase();
       }
       if (textEl) textEl.textContent = 'Presenter Portal →';
       if (btn) {
@@ -2174,7 +2220,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (user.role === 'Presenter' || user.role === 'Speaker') {
+    if (user.role === 'Presenter' || user.role === 'Speaker' || user.isApprovedPresenter === true) {
       navigateToPortal('presenter');
       return;
     }
@@ -2182,6 +2228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const app = dataService.getMemberPresenterApplication(user.id, user.email);
     if (app && app.status === 'Approved') {
       user.role = 'Presenter';
+      user.isApprovedPresenter = true;
       authService.saveSession(user);
       navigateToPortal('presenter');
       return;
