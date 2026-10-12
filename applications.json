@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "id": "app_mv5lfplh",
+    "name": "Member",
+    "email": "test.delegate@example.com",
+    "password": "",
+    "country": "Global",
+    "flag": "INT",
+    "status": "Rejected",
+    "date": "2026-10-12"
+  }
+]
