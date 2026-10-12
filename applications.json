@@ -1,5 +1,24 @@
 [
   {
+    "id": "papp_mv5mngvi",
+    "userId": "usr_mv5mmo5q",
+    "name": "Riswan CKD",
+    "email": "riswankckd@gmail.com",
+    "country": "India Delegation",
+    "flag": "INT",
+    "primarySpheres": [
+      "global-affairs"
+    ],
+    "proposedTopic": "ASDFGHJLK;'",
+    "researchExperience": "ESSDFGHJLK;",
+    "dossierUrl": "",
+    "preferredFormat": "15-min Keynote Briefing",
+    "statementOfIntent": "Qasdfghjkl;.",
+    "status": "Pending",
+    "type": "presenter",
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_mv5mmo5q",
     "name": "Riswan CKD",
     "email": "riswankckd@gmail.com",
