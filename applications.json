@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv5mmo5q",
+    "name": "Riswan CKD",
+    "email": "riswankckd@gmail.com",
+    "password": "456123",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Education & Knowledge"
+    ],
+    "debateExperience": "dxcfvn,m,.",
+    "motivation": "szxdcbnm,.",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-12"
+  },
+  {
     "id": "papp_mv5lsebc",
     "userId": "usr_mv5lr7t8",
     "name": "Bushrabi PP",
