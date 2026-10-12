@@ -30,8 +30,31 @@ class AuthService {
       const stored = localStorage.getItem(AUTH_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        const demoEmails = ['member@gyd.org', 'presenter@gyd.org', 'coordinator@gyd.org', 'amara.chen@gyd.org', 'elena.rostova@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org'];
-        if (parsed && parsed.email && demoEmails.includes(parsed.email.toLowerCase())) {
+        if (!parsed || !parsed.email) return null;
+        const cleanEmail = (parsed.email || '').trim().toLowerCase();
+
+        // Check if user was deleted
+        let isDeleted = false;
+        try {
+          const deletedList = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+          if (Array.isArray(deletedList) && deletedList.includes(cleanEmail)) isDeleted = true;
+        } catch (e) {}
+        if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+          if (window.GYD_DATA.db.deletedUserEmails.includes(cleanEmail)) isDeleted = true;
+        }
+        if (isDeleted) {
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          return null;
+        }
+
+        const demoEmails = [
+          'member@gyd.org', 'presenter@gyd.org', 'coordinator@gyd.org',
+          'amara.chen@gyd.org', 'elena.rostova@gyd.org', 'zaid.harbi@gyd.org',
+          'sofia.morales@gyd.org', 'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+          'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+          'farhan.n@outlook.com', 'sarah.vandijk@edu.nl', 'amina.kuwari@youth.qa', 'kofi.mensah@ug.edu.gh'
+        ];
+        if (demoEmails.includes(cleanEmail)) {
           localStorage.removeItem(AUTH_STORAGE_KEY);
           return null;
         }
@@ -92,56 +115,85 @@ class AuthService {
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPassword = (password || '').trim();
 
-    const isTrialDeleted = (function() {
-      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
+    // 0. Primary Administrator Check
+    if (cleanEmail === '3681mubashircp@gmail.com') {
+      if (cleanPassword !== '368136') {
+        return { success: false, message: 'Incorrect password for Administrator account.' };
+      }
+      const adminUser = {
+        id: 'usr_admin_mubashir',
+        name: 'Mubashir CP',
+        email: '3681mubashircp@gmail.com',
+        password: '368136',
+        role: 'Coordinator',
+        department: 'Executive Leadership & Administration',
+        country: 'India',
+        flag: 'IN',
+        bio: 'Executive Director & Chief Platform Administrator, Global Youth Dialogue & Exchange (GYDE).',
+        interests: ['Global Affairs', 'Governance & Society', 'Technology & AI', 'Education'],
+        status: 'active',
+        joinedDate: '2024-01-01'
+      };
+      const requestedPortal = (portal || 'coordinator').toLowerCase();
+      const dest = (requestedPortal === 'member') ? 'member' : ((requestedPortal === 'presenter') ? 'presenter' : 'coordinator');
+      this.saveSession(adminUser);
+      return { success: true, user: adminUser, portal: dest };
+    }
+
+    // 1. Check if user was deleted by admin
+    const isDeleted = (function() {
+      try {
+        const deletedList = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+        if (Array.isArray(deletedList) && deletedList.includes(cleanEmail)) return true;
+      } catch (e) {}
+      if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+        if (window.GYD_DATA.db.deletedUserEmails.includes(cleanEmail)) return true;
+      }
+      return false;
     })();
+
+    if (isDeleted) {
+      return {
+        success: false,
+        message: 'This account has been removed by the administrator. Access is revoked.'
+      };
+    }
+
+    // 2. Reject all legacy demo accounts
+    const legacyDemoEmails = [
+      'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+      'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
+      'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+      'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+      'farhan.n@outlook.com', 'elena.rostova@debate.sg',
+      'sarah.vandijk@edu.nl', 'amina.kuwari@youth.qa', 'kofi.mensah@ug.edu.gh'
+    ];
+    if (legacyDemoEmails.includes(cleanEmail)) {
+      return {
+        success: false,
+        message: 'Demo credentials are permanently disabled for the official launch. Please apply for membership.'
+      };
+    }
 
     let users = [];
     if (window.GYD_DATA && typeof window.GYD_DATA.getUsers === 'function') {
       users = window.GYD_DATA.getUsers() || [];
     }
-    if ((!users || users.length === 0) && typeof INITIAL_DATABASE !== 'undefined') {
-      users = INITIAL_DATABASE.users || [];
-    }
 
-    // --- 1. Find user in current roster ---
     let user = users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
 
-    // --- 2. Auto-inject or sync seed user if needed (strictly preserve admin) ---
-    if (typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.users)) {
-      const seedMatch = INITIAL_DATABASE.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-      if (seedMatch) {
-        const isAdmin = seedMatch && (seedMatch.id === 'usr_admin_mubashir' || seedMatch.email.toLowerCase() === '3681mubashircp@gmail.com');
-        if (!isTrialDeleted || isAdmin) {
-          if (!user) {
-            user = JSON.parse(JSON.stringify(seedMatch));
-            if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
-              window.GYD_DATA.db.users.unshift(user);
-              if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
-            }
-          } else if (isAdmin) {
-            user.password = seedMatch.password;
-            user.role = seedMatch.role;
-            user.status = seedMatch.status;
-            if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
-          }
-        }
-      }
-    }
-
-    // --- 3. Check Applications Roster (auto-register approved applicants immediately) ---
+    // 3. Check Applications Roster (auto-register approved applicants immediately)
     if (!user) {
       let appMatch = null;
       if (window.GYD_DATA && typeof window.GYD_DATA.getApplications === 'function') {
         const apps = window.GYD_DATA.getApplications() || [];
         appMatch = apps.find(a => a.email && a.email.trim().toLowerCase() === cleanEmail);
       }
-      if (!appMatch && typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.applications)) {
-        appMatch = INITIAL_DATABASE.applications.find(a => a.email && a.email.trim().toLowerCase() === cleanEmail);
-      }
 
       if (appMatch) {
-        if (appMatch.status === 'Pending') {
+        if (appMatch.status === 'Deleted') {
+          return { success: false, message: 'This account has been removed by the administrator. Access is revoked.' };
+        } else if (appMatch.status === 'Pending') {
           return { success: false, message: 'Your application is currently pending admin approval. You will receive an email notification once approved.' };
         } else if (appMatch.status === 'Rejected' || appMatch.status === 'Declined') {
           return { success: false, message: 'Your membership application was declined by the administrator.' };
@@ -154,20 +206,15 @@ class AuthService {
         );
         if (isApproved) {
           const expectedAppPass = (appMatch.password || '').trim();
-          if (expectedAppPass && cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
-            // If expectedAppPass is the default placeholder 'gyde2024', adopt the user's real password
-            if (expectedAppPass === 'gyde2024' && cleanPassword.length >= 6) {
-              appMatch.password = cleanPassword;
-            } else {
-              return { success: false, message: 'Incorrect password. Please verify your credentials.' };
-            }
+          if (expectedAppPass && cleanPassword !== expectedAppPass) {
+            return { success: false, message: 'Incorrect password. Please verify your credentials.' };
           }
 
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
-            password: (appMatch.password && appMatch.password.trim()) ? appMatch.password.trim() : cleanPassword,
+            password: expectedAppPass || cleanPassword,
             role: 'Member',
             department: `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
@@ -188,26 +235,13 @@ class AuthService {
     }
 
     if (!user) {
-      const isDemoEmail = ['coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org', 'amara.chen@gyd.org', 'elena.rostova@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org'].includes(cleanEmail);
-      if (isTrialDeleted && isDemoEmail) {
-        return { 
-          success: false, 
-          message: 'All demo and trial profiles of members, presenters, and coordinators have been deleted. Only official registered accounts are active.' 
-        };
-      }
       return { success: false, message: 'No approved account found with this email. Please apply for membership.' };
     }
 
-    // --- Password check ---
+    // --- Strict password verification ---
     const userPass = (user.password || '').trim();
-    if (userPass && userPass !== cleanPassword && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
-      // If userPass was the default placeholder 'gyde2024', adopt user's real registered password
-      if (userPass === 'gyde2024' && cleanPassword.length >= 6) {
-        user.password = cleanPassword;
-        if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
-      } else {
-        return { success: false, message: 'Incorrect password. Please verify your credentials.' };
-      }
+    if (userPass && userPass !== cleanPassword) {
+      return { success: false, message: 'Incorrect password. Please verify your credentials.' };
     }
     if (!user.password && cleanPassword) {
       user.password = cleanPassword;
@@ -219,10 +253,7 @@ class AuthService {
       return { success: false, message: 'Your account is pending admin approval or review.' };
     }
 
-    // --- Role-portal gatekeeping with strict role permissions ---
-    // Member: ONLY access to Member dashboard
-    // Presenter: access to Presenter AND Member dashboards (NO Admin)
-    // Admin: access to ALL three dashboards (Admin, Presenter, Member)
+    // --- Role-portal gatekeeping ---
     const isAdmin = (
       user.role === 'Coordinator' ||
       user.role === 'Admin' ||
@@ -264,56 +295,78 @@ class AuthService {
           requiredRole: 'presenter'
         };
       }
-      if (requestedPortal === 'presenter') {
-        destinationPortal = 'presenter';
-      } else {
-        destinationPortal = 'member';
-      }
+      destinationPortal = (requestedPortal === 'presenter') ? 'presenter' : 'member';
     } else if (isAdmin) {
-      // Admin credential authorized across all three scopes/dashboards
-      if (requestedPortal === 'admin' || requestedPortal === 'coordinator') {
-        destinationPortal = 'coordinator';
-      } else if (requestedPortal === 'presenter') {
-        destinationPortal = 'presenter';
-      } else {
-        destinationPortal = 'member';
-      }
+      destinationPortal = (requestedPortal === 'admin' || requestedPortal === 'coordinator') ? 'coordinator' : ((requestedPortal === 'presenter') ? 'presenter' : 'member');
     }
 
     this.saveSession(user);
     return { success: true, user, portal: destinationPortal };
   }
 
-  // Legacy passthrough (used by demo buttons — auto-detects role)
+  // Legacy passthrough (auto-detects role)
   login(email, password) {
     const cleanEmail = (email || '').trim().toLowerCase();
     const cleanPassword = (password || '').trim();
 
-    const isTrialDeleted = (function() {
-      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
+    // 0. Primary Administrator Check
+    if (cleanEmail === '3681mubashircp@gmail.com') {
+      if (cleanPassword !== '368136') {
+        return { success: false, message: 'Incorrect password for Administrator account.' };
+      }
+      const adminUser = {
+        id: 'usr_admin_mubashir',
+        name: 'Mubashir CP',
+        email: '3681mubashircp@gmail.com',
+        password: '368136',
+        role: 'Coordinator',
+        department: 'Executive Leadership & Administration',
+        country: 'India',
+        flag: 'IN',
+        bio: 'Executive Director & Chief Platform Administrator, Global Youth Dialogue & Exchange (GYDE).',
+        interests: ['Global Affairs', 'Governance & Society', 'Technology & AI', 'Education'],
+        status: 'active',
+        joinedDate: '2024-01-01'
+      };
+      this.saveSession(adminUser);
+      return { success: true, user: adminUser };
+    }
+
+    // 1. Check if user was deleted
+    const isDeleted = (function() {
+      try {
+        const deletedList = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+        if (Array.isArray(deletedList) && deletedList.includes(cleanEmail)) return true;
+      } catch (e) {}
+      if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+        if (window.GYD_DATA.db.deletedUserEmails.includes(cleanEmail)) return true;
+      }
+      return false;
     })();
+
+    if (isDeleted) {
+      return { success: false, message: 'This account has been removed by the administrator. Access is revoked.' };
+    }
+
+    // 2. Reject demo accounts
+    const legacyDemoEmails = [
+      'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+      'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
+      'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+      'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+      'farhan.n@outlook.com', 'elena.rostova@debate.sg',
+      'sarah.vandijk@edu.nl', 'amina.kuwari@youth.qa', 'kofi.mensah@ug.edu.gh'
+    ];
+    if (legacyDemoEmails.includes(cleanEmail)) {
+      return { success: false, message: 'Demo credentials have been permanently disabled for official launch.' };
+    }
 
     let users = [];
     if (window.GYD_DATA && typeof window.GYD_DATA.getUsers === 'function') {
       users = window.GYD_DATA.getUsers() || [];
     }
-    if ((!users || users.length === 0) && typeof INITIAL_DATABASE !== 'undefined') {
-      users = INITIAL_DATABASE.users || [];
-    }
 
     let user = users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-
-    if (!user && typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.users)) {
-      const seedMatch = INITIAL_DATABASE.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
-      const isAdmin = seedMatch && (seedMatch.id === 'usr_admin_mubashir' || seedMatch.email.toLowerCase() === '3681mubashircp@gmail.com');
-      if (seedMatch && (!isTrialDeleted || isAdmin)) {
-        user = JSON.parse(JSON.stringify(seedMatch));
-        if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
-          window.GYD_DATA.db.users.push(user);
-          if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
-        }
-      }
-    }
 
     if (!user) {
       let appMatch = null;
@@ -321,30 +374,25 @@ class AuthService {
         const apps = window.GYD_DATA.getApplications() || [];
         appMatch = apps.find(a => a.email && a.email.trim().toLowerCase() === cleanEmail);
       }
-      if (!appMatch && typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.applications)) {
-        appMatch = INITIAL_DATABASE.applications.find(a => a.email && a.email.trim().toLowerCase() === cleanEmail);
-      }
       if (appMatch) {
-        if (appMatch.status === 'Pending') {
-          return { success: false, message: 'Your application is currently pending admin approval. You will receive an email notification once approved.' };
+        if (appMatch.status === 'Deleted') {
+          return { success: false, message: 'This account has been removed by the administrator. Access is revoked.' };
+        } else if (appMatch.status === 'Pending') {
+          return { success: false, message: 'Your application is currently pending admin approval.' };
         } else if (appMatch.status === 'Rejected' || appMatch.status === 'Declined') {
           return { success: false, message: 'Your membership application was declined by the administrator.' };
         }
 
         if (appMatch.status === 'Approved' || appMatch.status === 'Approved - Awaiting Registration' || appMatch.status === 'Registered') {
           const expectedAppPass = (appMatch.password || '').trim();
-          if (expectedAppPass && cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
-            if (expectedAppPass === 'gyde2024' && cleanPassword.length >= 6) {
-              appMatch.password = cleanPassword;
-            } else {
-              return { success: false, message: 'Invalid password.' };
-            }
+          if (expectedAppPass && cleanPassword !== expectedAppPass) {
+            return { success: false, message: 'Invalid password.' };
           }
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
-            password: (appMatch.password && appMatch.password.trim()) ? appMatch.password.trim() : cleanPassword,
+            password: expectedAppPass || cleanPassword,
             role: 'Member',
             department: `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
@@ -368,13 +416,8 @@ class AuthService {
       return { success: false, message: 'No approved account found with this email. Please apply for membership.' };
     }
     const userPass = (user.password || '').trim();
-    if (userPass && userPass !== cleanPassword && cleanPassword !== userPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
-      if (userPass === 'gyde2024' && cleanPassword.length >= 6) {
-        user.password = cleanPassword;
-        if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
-      } else {
-        return { success: false, message: 'Invalid password.' };
-      }
+    if (userPass && userPass !== cleanPassword) {
+      return { success: false, message: 'Invalid password.' };
     }
     if (user.status !== 'active') {
       return { success: false, message: 'Your account is currently under review.' };

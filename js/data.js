@@ -3,7 +3,7 @@
  * Manages local database with pre-seeded demo content based on the project brief.
  */
 
-const STORAGE_KEY = 'gyd_platform_db_v4';
+const STORAGE_KEY = 'gyd_platform_db_v5';
 
 // Initial pre-seeded database
 const INITIAL_DATABASE = {
@@ -21,90 +21,6 @@ const INITIAL_DATABASE = {
       interests: ['Global Affairs', 'Governance & Society', 'Technology & AI', 'Education'],
       status: 'active',
       joinedDate: '2024-01-01'
-    },
-    {
-      id: 'usr_sagia_asadien',
-      name: 'Sagia Saasadien',
-      email: 'sagiasaasadien@gmail.com',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • South Africa',
-      country: 'South Africa',
-      flag: 'ZA',
-      bio: 'Active youth debater and parliamentary speaker. Committed to international youth diplomacy and constructive cross-cultural dialogue.',
-      interests: ['Global Affairs', 'Governance & Society'],
-      status: 'active',
-      joinedDate: '2024-10-09'
-    },
-    {
-      id: 'usr_muzwgir5',
-      name: 'Rana Ali',
-      email: 'ranaalo.644@gmail.com',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • Pakistan',
-      country: 'Pakistan',
-      flag: 'PK',
-      bio: 'Competitive parliamentary debate speaker. Committed to international youth diplomacy and collaborative research.',
-      interests: ['Global Affairs', 'Governance & Society'],
-      status: 'active',
-      joinedDate: '2024-10-08'
-    },
-    {
-      id: 'usr_muzw3l9n',
-      name: 'Sümeyye Bulut',
-      email: 'sumeyye.bulut@stu.ihu.edu.tr',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • Turkey',
-      country: 'Turkey',
-      flag: 'TR',
-      bio: 'University debate society delegate. Excited to represent international youth debaters in multilateral discourse.',
-      interests: ['Education & Knowledge', 'Global Affairs'],
-      status: 'active',
-      joinedDate: '2024-10-08'
-    },
-    {
-      id: 'usr_muzw3483',
-      name: 'Hima works',
-      email: 'himaworking@gmail.com',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • India',
-      country: 'India',
-      flag: 'IN',
-      bio: 'Youth parliament and debating forum participant. Eager to debate digital policy and sustainable governance with global delegates.',
-      interests: ['Technology & Innovation', 'Governance & Society'],
-      status: 'active',
-      joinedDate: '2024-10-08'
-    },
-    {
-      id: 'usr_01',
-      name: 'Farhan Nadeem',
-      email: 'farhan.n@outlook.com',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • Pakistan',
-      country: 'Pakistan',
-      flag: 'PK',
-      bio: 'Debater at National Schools Championship Pakistan, 3 years parliamentary format. Cross-border intellectual ties and sustainable governance.',
-      interests: ['Global Affairs', 'Governance & Society'],
-      status: 'active',
-      joinedDate: '2024-10-06'
-    },
-    {
-      id: 'usr_05',
-      name: 'Elena Rostova',
-      email: 'elena.rostova@debate.sg',
-      password: 'gyde2024',
-      role: 'Member',
-      department: 'Youth Delegation • Singapore',
-      country: 'Singapore',
-      flag: 'SG',
-      bio: 'Singapore WSDC youth delegation finalist, 4 years competitive debate. Excited to engage with international thinkers on geopolitical mediation and publish collaborative youth research papers.',
-      interests: ['Peace & Conflict', 'Global Affairs'],
-      status: 'active',
-      joinedDate: '2024-10-08'
     }
   ],
 
@@ -1137,116 +1053,7 @@ const INITIAL_DATABASE = {
 
   feedback: [],
 
-    applications: [
-    {
-      id: 'app_sagia_asadien',
-      name: 'Sagia Saasadien',
-      email: 'sagiasaasadien@gmail.com',
-      country: 'South Africa',
-      flag: 'ZA',
-      interests: ['Global Affairs', 'Governance & Society'],
-      debateExperience: 'Active youth debater and parliamentary speaker.',
-      motivation: 'Committed to international youth diplomacy and constructive cross-cultural dialogue.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-09'
-    },
-    {
-      id: 'app_muzwgir5',
-      name: 'Rana Ali',
-      email: 'ranaalo.644@gmail.com',
-      country: 'Pakistan',
-      flag: 'PK',
-      interests: ['Global Affairs', 'Governance & Society'],
-      debateExperience: 'Competitive parliamentary debate speaker.',
-      motivation: 'Committed to international youth diplomacy and collaborative research.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-08'
-    },
-    {
-      id: 'app_muzw3l9n',
-      name: 'Sümeyye Bulut',
-      email: 'sumeyye.bulut@stu.ihu.edu.tr',
-      country: 'Turkey',
-      flag: 'TR',
-      interests: ['Education & Knowledge', 'Global Affairs'],
-      debateExperience: 'University debate society delegate.',
-      motivation: 'Excited to represent international youth debaters in multilateral discourse.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-08'
-    },
-    {
-      id: 'app_muzw3483',
-      name: 'Hima works',
-      email: 'himaworking@gmail.com',
-      country: 'India',
-      flag: 'IN',
-      interests: ['Technology & Innovation', 'Governance & Society'],
-      debateExperience: 'Youth parliament and debating forum participant.',
-      motivation: 'Eager to debate digital policy and sustainable governance with global delegates.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-08'
-    },
-    {
-      id: 'app_01',
-      name: 'Farhan Nadeem',
-      email: 'farhan.n@outlook.com',
-      country: 'Pakistan',
-      flag: 'PK',
-      interests: ['Global Affairs', 'Governance & Society'],
-      debateExperience: 'Debater at National Schools Championship Pakistan, 3 years parliamentary format.',
-      motivation: 'I want to build cross-border intellectual ties with fellow youth who care about sustainable governance and international diplomacy.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-06'
-    },
-    {
-      id: 'app_02',
-      name: 'Sarah Van Dijk',
-      email: 'sarah.vandijk@edu.nl',
-      country: 'Netherlands',
-      flag: 'NL',
-      interests: ['Environment', 'Economy'],
-      debateExperience: 'European Youth Parliament delegate, university debate society treasurer.',
-      motivation: 'Passionate about ecological economics and learning how Global South debaters view loss-and-damage policy.',
-      status: 'Pending',
-      date: '2024-10-07'
-    },
-    {
-      id: 'app_03',
-      name: 'Amina Al-Kuwari',
-      email: 'amina.kuwari@youth.qa',
-      country: 'Qatar',
-      flag: 'QA',
-      interests: ['Human Rights & Law', 'Global Affairs'],
-      debateExperience: 'QatarDebate National League delegate, English & Arabic parliamentary debate speaker.',
-      motivation: 'Eager to represent Gulf youth perspectives in multilateral discourse and collaborate on youth policy synthesis.',
-      status: 'Pending',
-      date: '2024-10-08'
-    },
-    {
-      id: 'app_04',
-      name: 'Kofi Mensah',
-      email: 'kofi.mensah@ug.edu.gh',
-      country: 'Ghana',
-      flag: 'GH',
-      interests: ['Education & Knowledge', 'Technology & Innovation'],
-      debateExperience: 'African Debate Academy finalist, Pan-African Universities Debating Championship participant.',
-      motivation: 'Committed to amplifying African youth research and bridging global digital governance divides through evidence-based motions.',
-      status: 'Pending',
-      date: '2024-10-08'
-    },
-    {
-      id: 'app_05',
-      name: 'Elena Rostova',
-      email: 'elena.rostova@debate.sg',
-      country: 'Singapore',
-      flag: 'SG',
-      interests: ['Peace & Conflict', 'Global Affairs'],
-      debateExperience: 'Singapore WSDC youth delegation finalist, 4 years competitive debate.',
-      motivation: 'Excited to engage with international thinkers on geopolitical mediation and publish collaborative youth research papers.',
-      status: 'Approved - Awaiting Registration',
-      date: '2024-10-08'
-    }
-  ],
+  applications: [],
 
   presenterApplications: [],
 
@@ -1374,48 +1181,86 @@ class DataService {
         if (!parsed.presenterApplications || !parsed.presenterApplications.length) {
           parsed.presenterApplications = JSON.parse(JSON.stringify(INITIAL_DATABASE.presenterApplications || []));
         }
-        // Check if trial data has been purged by the administrator
-        const isTrialDeleted = (function() {
-          try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
-        })();
+        // Clean up any legacy localStorage database versions
+        try {
+          ['gyd_platform_db', 'gyd_platform_db_v2', 'gyd_platform_db_v3', 'gyd_platform_db_v4'].forEach(k => localStorage.removeItem(k));
+        } catch (e) {}
 
-        if (isTrialDeleted) {
-          // Permanently erase all synthetic demo accounts and seed trial accounts
-          // Retain the Administrator and any real members who have been registered/approved
-          const seedTrialEmails = [
-            'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
-            'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
-            'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
-            'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
-            'farhan.n@outlook.com', 'elena.rostova@debate.sg'
-          ];
-          if (Array.isArray(parsed.users)) {
-            parsed.users = parsed.users.filter(u => {
-              const em = (u.email || '').toLowerCase().trim();
-              if (em === '3681mubashircp@gmail.com' || u.id === 'usr_admin_mubashir') return true;
-              return !seedTrialEmails.includes(em);
-            });
-          } else {
-            parsed.users = [];
-          }
+        const legacyDemoEmails = [
+          'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+          'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
+          'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com',
+          'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com',
+          'farhan.n@outlook.com', 'elena.rostova@debate.sg',
+          'sarah.vandijk@edu.nl', 'amina.kuwari@youth.qa', 'kofi.mensah@ug.edu.gh'
+        ];
 
-          // Do NOT re-inject seed applications when trial data is deleted!
-          if (!Array.isArray(parsed.applications)) {
-            parsed.applications = [];
-          } else {
-            parsed.applications = parsed.applications.filter(a => {
-              const em = (a.email || '').toLowerCase().trim();
-              return !seedTrialEmails.includes(em);
+        // Load deleted emails tombstones
+        let deletedEmails = Array.isArray(parsed.deletedUserEmails) ? parsed.deletedUserEmails : [];
+        try {
+          const localDel = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+          if (Array.isArray(localDel)) {
+            localDel.forEach(e => {
+              const cl = (e || '').toLowerCase().trim();
+              if (cl && !deletedEmails.includes(cl)) deletedEmails.push(cl);
             });
           }
+        } catch (e) {}
+        parsed.deletedUserEmails = deletedEmails;
+
+        // Clean users: retain ONLY active non-deleted official accounts, never demo accounts
+        if (Array.isArray(parsed.users)) {
+          parsed.users = parsed.users.filter(u => {
+            const em = (u.email || '').toLowerCase().trim();
+            if (em === '3681mubashircp@gmail.com' || u.id === 'usr_admin_mubashir') return true;
+            if (deletedEmails.includes(em)) return false;
+            if (legacyDemoEmails.includes(em)) return false;
+            return true;
+          });
         } else {
-          // Ensure all seed users and applicants are present
-          if (!Array.isArray(parsed.users)) {
-            parsed.users = JSON.parse(JSON.stringify(INITIAL_DATABASE.users));
-          }
+          parsed.users = [];
         }
 
-        // Always sync community users so no registered or approved members are ever missing
+        // Strictly enforce primary administrator credentials
+        let adminUser = parsed.users.find(u => u.id === 'usr_admin_mubashir' || (u.email && u.email.toLowerCase().trim() === '3681mubashircp@gmail.com'));
+        if (!adminUser) {
+          adminUser = JSON.parse(JSON.stringify(INITIAL_DATABASE.users[0]));
+          parsed.users.unshift(adminUser);
+        } else {
+          adminUser.name = 'Mubashir CP';
+          adminUser.email = '3681mubashircp@gmail.com';
+          adminUser.password = '368136';
+          adminUser.role = 'Coordinator';
+          adminUser.status = 'active';
+        }
+
+        // Clean applications: remove demo applications and deleted members
+        if (Array.isArray(parsed.applications)) {
+          parsed.applications = parsed.applications.filter(a => {
+            const em = (a.email || '').toLowerCase().trim();
+            if (a.status === 'Deleted') return false;
+            if (deletedEmails.includes(em)) return false;
+            if (legacyDemoEmails.includes(em)) return false;
+            return true;
+          });
+        } else {
+          parsed.applications = [];
+        }
+
+        // Clean presenter applications
+        if (Array.isArray(parsed.presenterApplications)) {
+          parsed.presenterApplications = parsed.presenterApplications.filter(a => {
+            const em = (a.email || '').toLowerCase().trim();
+            if (a.status === 'Deleted') return false;
+            if (deletedEmails.includes(em)) return false;
+            if (legacyDemoEmails.includes(em)) return false;
+            return true;
+          });
+        } else {
+          parsed.presenterApplications = [];
+        }
+
+        // Synchronize community users
         this.syncCommunityUsers(parsed);
         return parsed;
       }
@@ -1792,6 +1637,27 @@ class DataService {
     }
 
     this.saveDatabase();
+
+    // 5. Send delete request to centralized serverless API & GitHub cloud store
+    try {
+      const apiUrl = this.getApplicationsApiUrl();
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'deleteUser', email: cleanEmail, id: userId })
+      }).catch(err => console.warn('Could not sync deleteUser to API:', err));
+    } catch (e) {}
+
+    // 6. If currently logged-in user on this device was deleted, log them out immediately
+    try {
+      if (typeof authService !== 'undefined') {
+        const cur = authService.getCurrentUser();
+        if (cur && cur.email && cur.email.toLowerCase().trim() === cleanEmail) {
+          authService.logout();
+        }
+      }
+    } catch (e) {}
+
     return true;
   }
 
@@ -1890,11 +1756,9 @@ class DataService {
         if (Array.isArray(remoteApps)) {
           if (!Array.isArray(this.db.applications)) this.db.applications = [];
 
-          const isTrialDeleted = (function() {
-            try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
-          })();
-
-          const seedTrialEmails = [
+          const legacyDemoEmails = [
+            'coordinator@gyd.org', 'presenter@gyd.org', 'member@gyd.org',
+            'amara.chen@gyd.org', 'zaid.harbi@gyd.org', 'sofia.morales@gyd.org',
             'sagiasaasadien@gmail.com', 'ranaalo.644@gmail.com', 
             'sumeyye.bulut@stu.ihu.edu.tr', 'himaworking@gmail.com', 
             'farhan.n@outlook.com', 'sarah.vandijk@edu.nl', 
@@ -1902,9 +1766,48 @@ class DataService {
             'elena.rostova@debate.sg'
           ];
 
+          let deletedEmails = Array.isArray(this.db.deletedUserEmails) ? [...this.db.deletedUserEmails] : [];
+          try {
+            const stored = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+            if (Array.isArray(stored)) {
+              stored.forEach(em => {
+                const cl = (em || '').toLowerCase().trim();
+                if (cl && !deletedEmails.includes(cl)) deletedEmails.push(cl);
+              });
+            }
+          } catch (e) {}
+
           remoteApps.forEach(rApp => {
             const cleanRAppEmail = (rApp.email || '').toLowerCase().trim();
-            if (isTrialDeleted && seedTrialEmails.includes(cleanRAppEmail)) {
+            if (!cleanRAppEmail) return;
+
+            // Handle deleted status from remote cloud database
+            if (rApp.status === 'Deleted' || deletedEmails.includes(cleanRAppEmail)) {
+              if (!deletedEmails.includes(cleanRAppEmail) && cleanRAppEmail !== '3681mubashircp@gmail.com') {
+                deletedEmails.push(cleanRAppEmail);
+                this.db.deletedUserEmails = deletedEmails;
+                try {
+                  localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(deletedEmails));
+                } catch (e) {}
+              }
+              // Purge user and application locally
+              this.db.users = this.db.users.filter(u => !u.email || u.email.toLowerCase().trim() !== cleanRAppEmail);
+              this.db.applications = this.db.applications.filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
+              if (Array.isArray(this.db.presenterApplications)) {
+                this.db.presenterApplications = this.db.presenterApplications.filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
+              }
+              try {
+                if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
+                  const cur = window.GYD_AUTH.getCurrentUser();
+                  if (cur && cur.email && cur.email.toLowerCase().trim() === cleanRAppEmail) {
+                    window.GYD_AUTH.logout();
+                  }
+                }
+              } catch (e) {}
+              return;
+            }
+
+            if (legacyDemoEmails.includes(cleanRAppEmail)) {
               return;
             }
 
@@ -1948,6 +1851,10 @@ class DataService {
     } catch (e) {
       console.warn('syncRemoteApplications warning:', e);
     }
+  }
+
+  getApplications() {
+    return Array.isArray(this.db.applications) ? this.db.applications : [];
   }
   getAnnouncements() { return this.db.announcements; }
 

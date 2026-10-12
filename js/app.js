@@ -785,8 +785,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not successful locally, query cloud applications in real-time
-    if (!result.success) {
+    // If not successful locally, query cloud applications in real-time (UNLESS user was removed)
+    const isEmailDeleted = (function() {
+      const cleanInput = (email || '').toLowerCase().trim();
+      if (cleanInput === '3681mubashircp@gmail.com') return false;
+      try {
+        const dList = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+        if (Array.isArray(dList) && dList.includes(cleanInput)) return true;
+      } catch (e) {}
+      if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+        if (window.GYD_DATA.db.deletedUserEmails.includes(cleanInput)) return true;
+      }
+      return false;
+    })();
+
+    if (!result.success && !isEmailDeleted && !result.message.includes('removed')) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -796,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const remoteApps = await res.json();
           const cleanInput = email.toLowerCase().trim();
           const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-          if (match && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
+          if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
@@ -856,79 +869,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 1-Click Role Testing & Global Demo Login Helpers
+  // 1-Click Role Testing & Global Login Helpers
   window.signInDemoCoordinator = function() {
-    const isTrialDeleted = (function() {
-      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
-    })();
-
-    if (isTrialDeleted) {
-      let res = authService.login('3681mubashircp@gmail.com', '368136');
-      if (res && res.success && res.user) {
-        closeModal('authModal');
-        navigateToPortal('coordinator');
-        showToast(`Signed in as Administrator: ${res.user.name} (3681mubashircp@gmail.com) → Opened Admin Workspace!`, 'success');
-        return;
-      }
-    }
-
-    let res = authService.login('coordinator@gyd.org', 'password123');
-    if (!res || !res.success) {
-      res = authService.loginAsDemo('Coordinator');
-    }
+    let res = authService.login('3681mubashircp@gmail.com', '368136');
     if (res && res.success && res.user) {
       closeModal('authModal');
       navigateToPortal('coordinator');
-      showToast(`Signed in as Admin / Coordinator: ${res.user.name} (${res.user.country}) → Opened Admin Workspace!`, 'success');
-    } else {
-      showToast(isTrialDeleted ? 'Demo coordinator profile was deleted. Please sign in with 3681mubashircp@gmail.com' : 'Could not sign in as Coordinator demo. Please try again.', 'error');
+      showToast(`Signed in as Administrator: ${res.user.name} (3681mubashircp@gmail.com) → Opened Admin Workspace!`, 'success');
+      return;
     }
+    showToast('Could not sign in as Administrator. Please check credentials.', 'error');
   };
 
   window.signInDemoPresenter = function() {
-    const isTrialDeleted = (function() {
-      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
-    })();
-
-    if (isTrialDeleted) {
-      showToast('All demo and trial profiles of presenters have been deleted by the Administrator. Only the official Administrator account is active.', 'warning');
-      return;
-    }
-
-    let res = authService.login('presenter@gyd.org', 'password123');
-    if (!res || !res.success) {
-      res = authService.loginAsDemo('Presenter');
-    }
-    if (res && res.success && res.user) {
-      closeModal('authModal');
-      navigateToPortal('presenter');
-      showToast(`Signed in as Presenter: ${res.user.name} (${res.user.country}) → Opened Presenter Portal (Can Present a Topic)!`, 'success');
-    } else {
-      showToast('Could not sign in as Presenter demo. Please try again.', 'error');
-    }
+    showToast('Demo presenter credentials are disabled for official launch. Please sign in with your registered credentials.', 'warning');
   };
 
   window.signInDemoMember = function() {
-    const isTrialDeleted = (function() {
-      try { return localStorage.getItem('gyd_trial_data_deleted') === 'true'; } catch (e) { return false; }
-    })();
-
-    if (isTrialDeleted) {
-      showToast('All demo and trial profiles of members have been deleted by the Administrator. Please register a new member account.', 'warning');
-      return;
-    }
-
-    let res = authService.login('member@gyd.org', 'password123');
-    if (!res || !res.success) {
-      res = authService.loginAsDemo('Member');
-    }
-    if (res && res.success && res.user) {
-      closeModal('authModal');
-      navigateToPortal('member');
-      showToast(`Signed in as Member: ${res.user.name} (${res.user.country}) → Can Participate in Sessions!`, 'success');
-    } else {
-      showToast('Could not sign in as Member demo. Please try again.', 'error');
-    }
+    showToast('Demo member credentials are disabled for official launch. Please apply for membership.', 'warning');
   };
 
   function syncTrialDeletionUI() {
@@ -1071,8 +1029,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not successful locally, query cloud applications in real-time
-    if (!result.success) {
+    // If not successful locally, query cloud applications in real-time (UNLESS user was removed)
+    const isEmailDeleted = (function() {
+      const cleanInput = (email || '').toLowerCase().trim();
+      if (cleanInput === '3681mubashircp@gmail.com') return false;
+      try {
+        const dList = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+        if (Array.isArray(dList) && dList.includes(cleanInput)) return true;
+      } catch (e) {}
+      if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+        if (window.GYD_DATA.db.deletedUserEmails.includes(cleanInput)) return true;
+      }
+      return false;
+    })();
+
+    if (!result.success && !isEmailDeleted && !result.message.includes('removed')) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -1082,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const remoteApps = await res.json();
           const cleanInput = email.toLowerCase().trim();
           const match = Array.isArray(remoteApps) && remoteApps.find(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-          if (match && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
+          if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);

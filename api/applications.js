@@ -7,117 +7,8 @@ const path = require('path');
 const TMP_FILE = path.join('/tmp', 'applications.json');
 const LOCAL_FILE = path.join(process.cwd(), 'applications.json');
 
-// Initial seed applications including live applicants
-let globalApplications = [
-  {
-    id: 'app_sagia_asadien',
-    name: 'Sagia Saasadien',
-    email: 'sagiasaasadien@gmail.com',
-    country: 'South Africa',
-    flag: 'ZA',
-    interests: ['Global Affairs', 'Governance & Society'],
-    debateExperience: 'Active youth debater and parliamentary speaker.',
-    motivation: 'Committed to international youth diplomacy and constructive cross-cultural dialogue.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-09'
-  },
-  {
-    id: 'app_muzwgir5',
-    name: 'Rana Ali',
-    email: 'ranaalo.644@gmail.com',
-    country: 'Pakistan',
-    flag: 'PK',
-    interests: ['Global Affairs', 'Governance & Society'],
-    debateExperience: 'Competitive parliamentary debate speaker.',
-    motivation: 'Committed to international youth diplomacy and collaborative research.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-08'
-  },
-  {
-    id: 'app_muzw3l9n',
-    name: 'Sümeyye Bulut',
-    email: 'sumeyye.bulut@stu.ihu.edu.tr',
-    country: 'Turkey',
-    flag: 'TR',
-    interests: ['Education & Knowledge', 'Global Affairs'],
-    debateExperience: 'University debate society delegate.',
-    motivation: 'Excited to represent international youth debaters in multilateral discourse.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-08'
-  },
-  {
-    id: 'app_muzw3483',
-    name: 'Hima works',
-    email: 'himaworking@gmail.com',
-    country: 'India',
-    flag: 'IN',
-    interests: ['Technology & Innovation', 'Governance & Society'],
-    debateExperience: 'Youth parliament and debating forum participant.',
-    motivation: 'Eager to debate digital policy and sustainable governance with global delegates.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-08'
-  },
-  {
-    id: 'app_01',
-    name: 'Farhan Nadeem',
-    email: 'farhan.n@outlook.com',
-    country: 'Pakistan',
-    flag: 'PK',
-    interests: ['Global Affairs', 'Governance & Society'],
-    debateExperience: 'Debater at National Schools Championship Pakistan, 3 years parliamentary format.',
-    motivation: 'I want to build cross-border intellectual ties with fellow youth who care about sustainable governance and international diplomacy.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-06'
-  },
-  {
-    id: 'app_02',
-    name: 'Sarah Van Dijk',
-    email: 'sarah.vandijk@edu.nl',
-    country: 'Netherlands',
-    flag: 'NL',
-    interests: ['Environment', 'Economy'],
-    debateExperience: 'European Youth Parliament delegate, university debate society treasurer.',
-    motivation: 'Passionate about ecological economics and learning how Global South debaters view loss-and-damage policy.',
-    status: 'Pending',
-    date: '2024-10-07'
-  },
-  {
-    id: 'app_03',
-    name: 'Amina Al-Kuwari',
-    email: 'amina.kuwari@youth.qa',
-    country: 'Qatar',
-    flag: 'QA',
-    interests: ['Human Rights & Law', 'Global Affairs'],
-    debateExperience: 'QatarDebate National League delegate, English & Arabic parliamentary debate speaker.',
-    motivation: 'Eager to represent Gulf youth perspectives in multilateral discourse and collaborate on youth policy synthesis.',
-    status: 'Pending',
-    date: '2024-10-08'
-  },
-  {
-    id: 'app_04',
-    name: 'Kofi Mensah',
-    email: 'kofi.mensah@ug.edu.gh',
-    country: 'Ghana',
-    flag: 'GH',
-    interests: ['Education & Knowledge', 'Technology & Innovation'],
-    debateExperience: 'African Debate Academy finalist, Pan-African Universities Debating Championship participant.',
-    motivation: 'Committed to amplifying African youth research and bridging global digital governance divides through evidence-based motions.',
-    status: 'Pending',
-    date: '2024-10-08'
-  },
-  {
-    id: 'app_05',
-    name: 'Elena Rostova',
-    email: 'elena.rostova@debate.sg',
-    country: 'Singapore',
-    flag: 'SG',
-    interests: ['Peace & Conflict', 'Global Affairs'],
-    debateExperience: 'Singapore WSDC youth delegation finalist, 4 years competitive debate.',
-    motivation: 'Excited to engage with international thinkers on geopolitical mediation and publish collaborative youth research papers.',
-    status: 'Approved - Awaiting Registration',
-    date: '2024-10-08'
-  }
-];
+// Official launch: active member applications repository
+let globalApplications = [];
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ['gh', 'p_D74GR1', 'vVkn4TTT6', 'gz5tZQHD', 'oKPf6m82hGSnm'].join('');
 const GITHUB_REPO = 'riswanckd/global-youth-dialogue';
@@ -140,18 +31,7 @@ async function fetchFromGitHub() {
         const decoded = Buffer.from(data.content, 'base64').toString('utf8');
         const parsed = JSON.parse(decoded);
         if (Array.isArray(parsed)) {
-          // Merge GitHub apps into globalApplications
-          const remoteList = [...parsed];
-          for (const localApp of globalApplications) {
-            const exists = remoteList.some(a => 
-              (a.id && localApp.id && a.id === localApp.id) || 
-              (a.email && localApp.email && a.email.toLowerCase().trim() === (localApp.email || '').toLowerCase().trim())
-            );
-            if (!exists) {
-              remoteList.unshift(localApp);
-            }
-          }
-          globalApplications = remoteList;
+          globalApplications = parsed;
           try {
             fs.writeFileSync(TMP_FILE, JSON.stringify(globalApplications, null, 2), 'utf8');
           } catch (e) {}
@@ -422,6 +302,34 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({
           success: true,
           message: 'All trial applications deleted from server.'
+        });
+      }
+
+      // Handle Delete Member / Delete User permanently from cloud database
+      if (body.action === 'deleteUser' || body.action === 'deleteMember') {
+        const targetEmail = (body.email || '').toLowerCase().trim();
+        const targetId = (body.id || '').trim();
+        globalApplications = globalApplications.filter(a => {
+          const aEmail = (a.email || '').toLowerCase().trim();
+          const aId = (a.id || '').trim();
+          if (targetEmail && aEmail === targetEmail) return false;
+          if (targetId && aId === targetId) return false;
+          return true;
+        });
+        if (targetEmail && targetEmail !== '3681mubashircp@gmail.com') {
+          globalApplications.push({
+            id: targetId || ('del_' + Date.now().toString(36)),
+            email: targetEmail,
+            name: body.name || 'Removed User',
+            password: '',
+            status: 'Deleted',
+            date: new Date().toISOString().split('T')[0]
+          });
+        }
+        await persistApplications();
+        return res.status(200).json({
+          success: true,
+          message: 'User credentials and application permanently removed from cloud database.'
         });
       }
 
