@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (portalName === 'coordinator') {
       if (!authService.isCoordinator()) {
-        showToast('Coordinator clearance required. Please sign in.', 'error');
+        showToast('Access Denied: Admin / Coordinator clearance required. Please sign in.', 'error');
         navigateToPortal('signin', pushHistory);
         return;
       }
@@ -687,6 +687,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!authService.isLoggedIn()) {
         showToast('Presenter access required. Please sign in.', 'error');
         navigateToPortal('signin', pushHistory);
+        return;
+      }
+      if (!authService.isPresenter() && !authService.isCoordinator()) {
+        showToast('Access Denied: Your account has Member privileges only. Restricted from Presenter area.', 'error');
+        navigateToPortal('member', pushHistory);
         return;
       }
       if (viewPresenter) viewPresenter.style.display = 'block';
@@ -780,12 +785,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not successful locally, query cloud applications in real-time from thegyde.in
+    // If not successful locally, query cloud applications in real-time
     if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
-          : 'https://www.thegyde.in/api/applications';
+          : '/api/applications';
         const res = await fetch(apiUrl);
         if (res.ok) {
           const remoteApps = await res.json();
@@ -795,7 +800,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-              const adoptedPassword = (match.password && match.password.trim()) ? match.password.trim() : password;
+              const adoptedPassword = (match.password && match.password.trim() && match.password.trim() !== 'gyde2024') 
+                ? match.password.trim() 
+                : password;
               const syncedMatch = { ...match, password: adoptedPassword };
 
               if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
@@ -803,6 +810,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
               if (typeof window.GYD_DATA.syncCommunityUsers === 'function') window.GYD_DATA.syncCommunityUsers();
               window.GYD_DATA.saveDatabase();
+
+              // Sync password to cloud
+              if (adoptedPassword && adoptedPassword === password) {
+                fetch(apiUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'updatePassword', email: cleanInput, password: adoptedPassword })
+                }).catch(() => {});
+              }
             }
             result = authService.loginWithRole(email, password, selectedPortal);
           }
@@ -1055,12 +1071,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let result = authService.loginWithRole(email, password, selectedPortal);
 
-    // If not successful locally, query cloud applications in real-time from thegyde.in
+    // If not successful locally, query cloud applications in real-time
     if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
-          : 'https://www.thegyde.in/api/applications';
+          : '/api/applications';
         const res = await fetch(apiUrl);
         if (res.ok) {
           const remoteApps = await res.json();
@@ -1070,7 +1086,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
-              const adoptedPassword = (match.password && match.password.trim()) ? match.password.trim() : password;
+              const adoptedPassword = (match.password && match.password.trim() && match.password.trim() !== 'gyde2024') 
+                ? match.password.trim() 
+                : password;
               const syncedMatch = { ...match, password: adoptedPassword };
 
               if (idx >= 0) window.GYD_DATA.db.applications[idx] = { ...window.GYD_DATA.db.applications[idx], ...syncedMatch };
@@ -1078,6 +1096,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
               if (typeof window.GYD_DATA.syncCommunityUsers === 'function') window.GYD_DATA.syncCommunityUsers();
               window.GYD_DATA.saveDatabase();
+
+              // Sync password to cloud
+              if (adoptedPassword && adoptedPassword === password) {
+                fetch(apiUrl, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'updatePassword', email: cleanInput, password: adoptedPassword })
+                }).catch(() => {});
+              }
             }
             result = authService.loginWithRole(email, password, selectedPortal);
           }
@@ -5953,13 +5980,14 @@ document.addEventListener('DOMContentLoaded', () => {
                   Joined: ${u.joinedDate || '2024'}
                 </span>
 
-                <div style="display: flex; gap: 0.4rem; align-items: center;">
-                  <button class="btn btn-outline btn-sm" style="font-size: 0.76rem; padding: 0.25rem 0.55rem; gap: 3px; color: var(--brand-primary); border-color: rgba(72, 81, 186, 0.35);" onclick="window.openCoordUserDossierModal('${u.id}')" title="View Complete Member Dossier">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path>
-                      <circle cx="12" cy="12" r="3"></circle>
+                <div style="display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;">
+                  <button class="btn btn-outline btn-sm btn-more-details" style="font-size: 0.76rem; padding: 0.28rem 0.6rem; gap: 4px; color: var(--brand-primary); border-color: rgba(72, 81, 186, 0.4); font-weight: 600; display: inline-flex; align-items: center;" onclick="window.openCoordUserDossierModal('${u.id}')" title="More Details about ${u.name}">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="16" x2="12" y2="12"></line>
+                      <line x1="12" y1="8" x2="12.01" y2="8"></line>
                     </svg>
-                    Details
+                    More Details about ${u.name.split(' ')[0] || u.name}
                   </button>
                   ${!isPrimaryAdmin ? `
                     <button class="btn btn-outline btn-sm" style="font-size: 0.76rem; padding: 0.25rem 0.55rem; gap: 3px;" onclick="window.openChangeUserRoleModal('${u.id}')" title="Change Role">
@@ -6133,7 +6161,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${flagSvg}
           </span>
         </div>
-        <h3 class="serif-text" style="margin: 0 0 0.4rem 0; font-size: 1.5rem; color: var(--text-dark);">${sanitize(user.name)}</h3>
+        <h3 class="serif-text" style="margin: 0 0 0.4rem 0; font-size: 1.45rem; color: var(--text-dark);">More Details about ${sanitize(user.name)}</h3>
         <div style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
           ${roleBadgeHtml}
           <span class="badge badge-light" style="font-size: 0.78rem; padding: 3px 8px; color: var(--text-muted); border: 1px solid rgba(0,0,0,0.08);">

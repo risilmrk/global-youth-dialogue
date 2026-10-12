@@ -418,6 +418,19 @@ module.exports = async function handler(req, res) {
         });
       }
 
+      // Handle Password Synchronization across remote browsers
+      if (body.action === 'updatePassword') {
+        const targetEmail = (body.email || '').trim().toLowerCase();
+        const targetPass = (body.password || '').trim();
+        const match = globalApplications.find(a => targetEmail && a.email && a.email.toLowerCase().trim() === targetEmail);
+        if (match && targetPass) {
+          match.password = targetPass;
+          persistApplications();
+          return res.status(200).json({ success: true, message: 'Password synchronized successfully.' });
+        }
+        return res.status(200).json({ success: false, message: 'No matching application to update password.' });
+      }
+
       // Handle Status Updates from Coordinator Dashboard (e.g. Approved / Rejected)
       const isExplicitStatusUpdate = (body.action === 'updateStatus' || body.action === 'update');
       const isStatusOnlyUpdate = (!body.name && body.status && (body.id || body.email));

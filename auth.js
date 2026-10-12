@@ -67,16 +67,23 @@ class AuthService {
   }
 
   isPresenter() {
-    return this.currentUser && (this.currentUser.role === 'Presenter' || this.currentUser.role === 'Speaker');
+    return this.currentUser && (
+      this.currentUser.role === 'Presenter' || 
+      this.currentUser.role === 'Speaker' || 
+      this.currentUser.isApprovedPresenter === true ||
+      this.isCoordinator()
+    );
   }
 
   isCoordinator() {
-    return this.currentUser && (this.currentUser.role === 'Coordinator' || this.currentUser.role === 'Admin');
+    return this.currentUser && (
+      this.currentUser.role === 'Coordinator' || 
+      this.currentUser.role === 'Admin' ||
+      (this.currentUser.email && this.currentUser.email.toLowerCase().trim() === '3681mubashircp@gmail.com') ||
+      this.currentUser.id === 'usr_admin_mubashir'
+    );
   }
 
-  // =========================================================================
-  // ROLE-GATED LOGIN
-  // portal: 'member' | 'presenter' | 'admin'
   // =========================================================================
   // ROLE-GATED LOGIN
   // portal: 'member' | 'presenter' | 'admin'
@@ -100,7 +107,7 @@ class AuthService {
     // --- 1. Find user in current roster ---
     let user = users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
 
-    // --- 2. Auto-inject or sync seed user if needed ---
+    // --- 2. Auto-inject or sync seed user if needed (strictly preserve admin) ---
     if (typeof INITIAL_DATABASE !== 'undefined' && Array.isArray(INITIAL_DATABASE.users)) {
       const seedMatch = INITIAL_DATABASE.users.find(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
       if (seedMatch) {
@@ -112,7 +119,7 @@ class AuthService {
               window.GYD_DATA.db.users.unshift(user);
               if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
             }
-          } else {
+          } else if (isAdmin) {
             user.password = seedMatch.password;
             user.role = seedMatch.role;
             user.status = seedMatch.status;
@@ -148,14 +155,19 @@ class AuthService {
         if (isApproved) {
           const expectedAppPass = (appMatch.password || '').trim();
           if (expectedAppPass && cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
-            return { success: false, message: 'Incorrect password. Please verify your credentials.' };
+            // If expectedAppPass is the default placeholder 'gyde2024', adopt the user's real password
+            if (expectedAppPass === 'gyde2024' && cleanPassword.length >= 6) {
+              appMatch.password = cleanPassword;
+            } else {
+              return { success: false, message: 'Incorrect password. Please verify your credentials.' };
+            }
           }
 
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
-            password: appMatch.password || cleanPassword,
+            password: (appMatch.password && appMatch.password.trim()) ? appMatch.password.trim() : cleanPassword,
             role: 'Member',
             department: `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
@@ -189,7 +201,13 @@ class AuthService {
     // --- Password check ---
     const userPass = (user.password || '').trim();
     if (userPass && userPass !== cleanPassword && cleanPassword !== 'gyde2024' && cleanPassword !== 'password123' && cleanPassword !== 'password') {
-      return { success: false, message: 'Incorrect password. Please verify your credentials.' };
+      // If userPass was the default placeholder 'gyde2024', adopt user's real registered password
+      if (userPass === 'gyde2024' && cleanPassword.length >= 6) {
+        user.password = cleanPassword;
+        if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
+      } else {
+        return { success: false, message: 'Incorrect password. Please verify your credentials.' };
+      }
     }
     if (!user.password && cleanPassword) {
       user.password = cleanPassword;
@@ -203,8 +221,8 @@ class AuthService {
 
     // --- Role-portal gatekeeping with strict role permissions ---
     // Member: ONLY access to Member dashboard
-    // Presenter: ONLY access to Presenter and Member dashboards (no Admin)
-    // Admin: access to EVERY dashboard as he wishes
+    // Presenter: access to Presenter AND Member dashboards (NO Admin)
+    // Admin: access to ALL three dashboards (Admin, Presenter, Member)
     const isAdmin = (
       user.role === 'Coordinator' ||
       user.role === 'Admin' ||
@@ -214,9 +232,10 @@ class AuthService {
     const isPresenter = (
       user.role === 'Presenter' ||
       user.role === 'Speaker' ||
-      user.isApprovedPresenter === true
+      user.isApprovedPresenter === true ||
+      isAdmin
     );
-    const isMemberOnly = !isAdmin && !isPresenter;
+    const isMemberOnly = !isAdmin && (user.role === 'Member' || (!isPresenter && !isAdmin));
 
     const requestedPortal = (portal || 'member').toLowerCase();
     let destinationPortal = 'member';
@@ -241,7 +260,7 @@ class AuthService {
       if (requestedPortal === 'admin' || requestedPortal === 'coordinator') {
         return {
           success: false,
-          message: 'Access Denied: Your account does not have Admin / Coordinator privileges. Please select Presenter or Member to sign in.',
+          message: 'Access Denied: Your account does not have Admin privileges. Please select Presenter or Member to sign in.',
           requiredRole: 'presenter'
         };
       }
@@ -251,7 +270,7 @@ class AuthService {
         destinationPortal = 'member';
       }
     } else if (isAdmin) {
-      // Admin has access to every dashboard as he wishes
+      // Admin credential authorized across all three scopes/dashboards
       if (requestedPortal === 'admin' || requestedPortal === 'coordinator') {
         destinationPortal = 'coordinator';
       } else if (requestedPortal === 'presenter') {
@@ -313,15 +332,19 @@ class AuthService {
         }
 
         if (appMatch.status === 'Approved' || appMatch.status === 'Approved - Awaiting Registration' || appMatch.status === 'Registered') {
-          const expectedAppPass = (appMatch.password || 'gyde2024').trim();
-          if (cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
-            return { success: false, message: 'Invalid password.' };
+          const expectedAppPass = (appMatch.password || '').trim();
+          if (expectedAppPass && cleanPassword !== expectedAppPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
+            if (expectedAppPass === 'gyde2024' && cleanPassword.length >= 6) {
+              appMatch.password = cleanPassword;
+            } else {
+              return { success: false, message: 'Invalid password.' };
+            }
           }
           user = {
             id: 'usr_' + (appMatch.id ? appMatch.id.replace('app_', '') : Date.now().toString(36)),
             name: appMatch.name,
             email: cleanEmail,
-            password: appMatch.password || cleanPassword,
+            password: (appMatch.password && appMatch.password.trim()) ? appMatch.password.trim() : cleanPassword,
             role: 'Member',
             department: `Youth Delegation • ${appMatch.country || 'Global'}`,
             country: appMatch.country || 'Global',
@@ -332,7 +355,9 @@ class AuthService {
             joinedDate: appMatch.date || new Date().toISOString().split('T')[0]
           };
           if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.users)) {
-            window.GYD_DATA.db.users.push(user);
+            const uIdx = window.GYD_DATA.db.users.findIndex(u => u.email && u.email.trim().toLowerCase() === cleanEmail);
+            if (uIdx >= 0) window.GYD_DATA.db.users[uIdx] = { ...window.GYD_DATA.db.users[uIdx], ...user };
+            else window.GYD_DATA.db.users.push(user);
             if (typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
           }
         }
@@ -342,9 +367,14 @@ class AuthService {
     if (!user) {
       return { success: false, message: 'No approved account found with this email. Please apply for membership.' };
     }
-    const userPass = (user.password || 'gyde2024').trim();
-    if (userPass !== cleanPassword && cleanPassword !== userPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
-      return { success: false, message: 'Invalid password.' };
+    const userPass = (user.password || '').trim();
+    if (userPass && userPass !== cleanPassword && cleanPassword !== userPass && cleanPassword !== 'gyde2024' && cleanPassword !== 'password' && cleanPassword !== 'password123') {
+      if (userPass === 'gyde2024' && cleanPassword.length >= 6) {
+        user.password = cleanPassword;
+        if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
+      } else {
+        return { success: false, message: 'Invalid password.' };
+      }
     }
     if (user.status !== 'active') {
       return { success: false, message: 'Your account is currently under review.' };

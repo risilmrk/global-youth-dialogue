@@ -1872,15 +1872,8 @@ class DataService {
   }
 
   getApplicationsApiUrl() {
-    if (typeof window !== 'undefined' && window.location && window.location.origin) {
-      if (
-        window.location.origin.includes('vercel.app') || 
-        window.location.origin.includes('thegyde.in') ||
-        window.location.origin.includes('localhost') ||
-        window.location.origin.includes('127.0.0.1')
-      ) {
-        return '/api/applications';
-      }
+    if (typeof window !== 'undefined' && window.location) {
+      return '/api/applications';
     }
     return 'https://www.thegyde.in/api/applications';
   }
@@ -2303,11 +2296,15 @@ class DataService {
     // Activate/create member in users list so they appear in community menu immediately
     if (!Array.isArray(this.db.users)) this.db.users = [];
     let userIndex = this.db.users.findIndex(u => u.email && u.email.toLowerCase().trim() === cleanEmail);
+    const resolvedPassword = (app.password && app.password.trim()) 
+      ? app.password.trim() 
+      : ((userIndex >= 0 && this.db.users[userIndex].password) ? this.db.users[userIndex].password : 'gyde2024');
+
     const activeUser = {
       id: 'usr_' + (app.id ? app.id.replace('app_', '') : Date.now().toString(36)),
       name: app.name,
       email: cleanEmail,
-      password: app.password || 'gyde2024',
+      password: resolvedPassword,
       role: 'Member',
       department: `Youth Delegation • ${app.country || 'Global'}`,
       country: app.country || 'Global',
@@ -2341,7 +2338,7 @@ class DataService {
           name: app.name,
           country: app.country,
           email: app.email,
-          password: app.password || '',
+          password: resolvedPassword,
           status: 'Approved'
         })
       }).catch(err => console.warn('Could not sync approval to remote API', err));
