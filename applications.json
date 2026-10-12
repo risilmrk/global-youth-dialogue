@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv5haypd",
+    "name": "Just Niyas",
+    "email": "justniyas@gmail.com",
+    "password": "123123",
+    "country": "india",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs"
+    ],
+    "debateExperience": "dfghjkrfghjk",
+    "motivation": "dfghjkyuiop",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_mv578nup",
     "name": "Mubashir Cp",
     "email": "dharabicdebateclub@gmail.com",
