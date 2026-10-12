@@ -7460,9 +7460,14 @@ body.rtl-mode .marquee-track {
    ========================================================================== */
 html, body {
   overflow-x: hidden !important;
-  max-width: 100vw !important;
+  max-width: 100% !important;
   width: 100% !important;
   -webkit-text-size-adjust: 100%;
+  box-sizing: border-box;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
@@ -7515,13 +7520,13 @@ html, body {
     overflow-y: auto !important;
   }
   .modal-dialog {
-    width: 95vw !important;
-    max-width: 95vw !important;
+    width: calc(100% - 1.25rem) !important;
+    max-width: calc(100% - 1.25rem) !important;
     margin: 0.5rem auto !important;
     padding: 1.25rem 1rem !important;
     border-radius: 14px !important;
     box-sizing: border-box !important;
-    max-height: 90vh !important;
+    max-height: calc(100dvh - 1.5rem) !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch !important;
   }
@@ -7580,6 +7585,26 @@ html, body {
   }
 
   /* 6. Coordinator & Community Dashboard Mobile */
+  .portal-content {
+    padding: 0.75rem 0.6rem calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+  }
+  .portal-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.45rem !important;
+    width: 100% !important;
+    margin-top: 0.5rem !important;
+  }
+  .portal-actions .btn {
+    flex: 1 1 calc(50% - 0.45rem) !important;
+    font-size: 0.74rem !important;
+    padding: 0.45rem 0.55rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+    white-space: nowrap !important;
+  }
   .coord-kpi-grid {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.65rem !important;
@@ -7587,12 +7612,33 @@ html, body {
   .coord-filter-tabs {
     flex-wrap: wrap !important;
     gap: 0.35rem !important;
+    width: 100% !important;
   }
   .coord-filter-tab-btn {
     font-size: 0.74rem !important;
     padding: 0.35rem 0.65rem !important;
     flex: 1 1 auto !important;
     text-align: center !important;
+  }
+  .coord-community-filter-row {
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .coord-search-wrap,
+  #coordCommunitySearchInput,
+  #coordCommunityCountryFilter {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+  .public-session-search-wrap,
+  #publicSessionSearch {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
   }
   .community-roster-grid {
     grid-template-columns: 1fr !important;
@@ -7606,6 +7652,13 @@ html, body {
     gap: 0.5rem !important;
     justify-content: space-between !important;
     align-items: center !important;
+  }
+  .card-panel {
+    padding: 1.15rem 0.85rem !important;
+  }
+  .card-panel .panel-header {
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
   }
 
   /* 7. Public Grids & Sections */
@@ -7637,6 +7690,53 @@ html, body {
   .collage-badge-tag {
     font-size: 0.58rem !important;
     padding: 0.18rem 0.35rem !important;
+  }
+
+  /* 9. Auth View & Card on Mobile */
+  .auth-page-view {
+    padding: 1.25rem 0.75rem calc(88px + env(safe-area-inset-bottom, 0px)) !important;
+    min-height: auto !important;
+  }
+  .auth-page-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 1.5rem 1.15rem !important;
+    box-sizing: border-box !important;
+  }
+  .role-segmented-switcher {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .role-segmented-tab {
+    padding: 0.5rem 0.25rem !important;
+    font-size: 0.78rem !important;
+    gap: 0.25rem !important;
+  }
+  .role-segmented-tab svg {
+    width: 14px !important;
+    height: 14px !important;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Hero Collage Single Column Stack */
+  .hero-collage-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .collage-main-card {
+    height: 220px !important;
+    width: 100% !important;
+  }
+  .collage-stack-col {
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  .collage-stack-card {
+    height: 160px !important;
+    width: 100% !important;
   }
 }
 
@@ -7683,6 +7783,10 @@ html, body {
     font-size: 0.84rem !important;
     padding: 0.55rem 0.95rem !important;
   }
+  .hero-meta-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.5rem !important;
+  }
   .coord-kpi-grid {
     grid-template-columns: 1fr !important;
     gap: 0.55rem !important;
@@ -7691,9 +7795,14 @@ html, body {
     grid-template-columns: 1fr !important;
     gap: 0.35rem !important;
   }
-  .collage-main-card,
-  .collage-stack-col {
-    height: 170px !important;
+  .collage-main-card {
+    height: 190px !important;
+  }
+  .collage-stack-card {
+    height: 140px !important;
+  }
+  .countdown-separator {
+    font-size: 1rem !important;
   }
 }
 

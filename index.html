@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description"
     content="Official platform of GYDE (Global Youth Dialogue & Exchange). Connecting young debaters, scholars, and youth leaders across 14+ nations for weekly structured parliamentary dialogues and academic research.">
   <meta name="keywords"
@@ -698,7 +698,7 @@
               <button class="btn btn-sm btn-outline" data-status="Upcoming" data-i18n="sessionsFilterUpcoming" onclick="window.filterPublicSessions('Upcoming')">Upcoming Sessions</button>
               <button class="btn btn-sm btn-outline" data-status="Completed" data-i18n="sessionsFilterCompleted" onclick="window.filterPublicSessions('Completed')">Completed Archive</button>
             </div>
-            <div style="position: relative; min-width: 260px;">
+            <div class="public-session-search-wrap" style="position: relative;">
               <input type="text" id="publicSessionSearch" class="form-control form-control-sm"
                 placeholder="Search sessions, topics, presenters..." oninput="window.filterPublicSessions()"
                 style="padding-inline-start: 2rem;">
@@ -3754,8 +3754,8 @@
               </div>
 
               <!-- Search and Country Filters -->
-              <div style="display: flex; gap: 0.65rem; flex-wrap: wrap; flex: 1; max-width: 520px; justify-content: flex-end;">
-                <div style="position: relative; flex: 1; min-width: 200px;">
+              <div class="coord-community-filter-row" style="display: flex; gap: 0.65rem; flex-wrap: wrap; flex: 1; max-width: 520px; justify-content: flex-end;">
+                <div class="coord-search-wrap" style="position: relative; flex: 1;">
                   <span style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
                   </span>
