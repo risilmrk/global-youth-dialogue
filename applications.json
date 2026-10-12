@@ -1,5 +1,15 @@
 [
   {
+    "id": "app_mv4tdc3q",
+    "name": "Member",
+    "email": "test_demo_applicant_42@example.com",
+    "password": "",
+    "country": "Global",
+    "flag": "INT",
+    "status": "Rejected",
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_sagia_asadien",
     "name": "Sagia Saasadien",
     "email": "sagiasaasadien@gmail.com",
@@ -31,7 +41,7 @@
   },
   {
     "id": "app_muzw3l9n",
-    "name": "S\u00fcmeyye Bulut",
+    "name": "Sümeyye Bulut",
     "email": "sumeyye.bulut@stu.ihu.edu.tr",
     "country": "Turkey",
     "flag": "TR",
