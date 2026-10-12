@@ -1811,6 +1811,47 @@ class DataService {
               return;
             }
 
+            // Check if this remote record is a Presenter Application:
+            const isPresenterApp = (rApp.type === 'presenter' || (rApp.id && String(rApp.id).startsWith('papp_')));
+
+            if (isPresenterApp) {
+              if (!Array.isArray(this.db.presenterApplications)) this.db.presenterApplications = [];
+              const pIdx = this.db.presenterApplications.findIndex(p => 
+                (p.id && String(p.id).trim() === String(rApp.id).trim()) || 
+                (p.email && p.email.toLowerCase().trim() === cleanRAppEmail)
+              );
+              if (pIdx === -1) {
+                this.db.presenterApplications.unshift(rApp);
+              } else {
+                const currentStatus = this.db.presenterApplications[pIdx].status;
+                const isLocalDecided = (currentStatus === 'Approved' || currentStatus === 'Rejected' || currentStatus === 'Declined');
+                const finalStatus = (isLocalDecided && rApp.status === 'Pending') ? currentStatus : (rApp.status || currentStatus);
+                this.db.presenterApplications[pIdx] = {
+                  ...this.db.presenterApplications[pIdx],
+                  ...rApp,
+                  status: finalStatus
+                };
+              }
+
+              if (rApp.status === 'Approved') {
+                if (Array.isArray(this.db.users)) {
+                  const u = this.db.users.find(u => u.email && u.email.toLowerCase().trim() === cleanRAppEmail);
+                  if (u) {
+                    u.role = 'Presenter';
+                    u.isApprovedPresenter = true;
+                  }
+                }
+                if (Array.isArray(this.db.applications)) {
+                  const ma = this.db.applications.find(a => a.email && a.email.toLowerCase().trim() === cleanRAppEmail);
+                  if (ma) {
+                    ma.role = 'Presenter';
+                    ma.isApprovedPresenter = true;
+                  }
+                }
+              }
+              return;
+            }
+
             const idx = this.db.applications.findIndex(a => a.id === rApp.id || (a.email && a.email.toLowerCase().trim() === cleanRAppEmail));
             if (idx === -1) {
               this.db.applications.unshift(rApp);
@@ -1846,6 +1887,9 @@ class DataService {
           else if (typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
 
           if (typeof window.checkApprovedApplicantNotice === 'function') window.checkApprovedApplicantNotice();
+
+          if (typeof window.updateMemberPresenterButtonState === 'function') window.updateMemberPresenterButtonState();
+          else if (typeof updateMemberPresenterButtonState === 'function') updateMemberPresenterButtonState();
         }
       }
     } catch (e) {
@@ -2358,7 +2402,7 @@ class DataService {
       id: 'papp_' + Date.now().toString(36),
       userId: appData.userId || null,
       name: appData.name,
-      email: appData.email,
+      email: (appData.email || '').trim().toLowerCase(),
       country: appData.country || 'Global',
       flag: appData.flag || 'INT',
       primarySpheres: appData.primarySpheres || [],
@@ -2368,9 +2412,19 @@ class DataService {
       preferredFormat: appData.preferredFormat || '15-min Keynote Briefing',
       statementOfIntent: appData.statementOfIntent || '',
       status: 'Pending',
+      type: 'presenter',
       date: new Date().toISOString().split('T')[0]
     };
-    this.db.presenterApplications.unshift(newApp);
+
+    const cleanEmail = newApp.email;
+    const existingIdx = this.db.presenterApplications.findIndex(a => 
+      (a.id && a.id === newApp.id) || (a.email && a.email.toLowerCase().trim() === cleanEmail)
+    );
+    if (existingIdx >= 0) {
+      this.db.presenterApplications[existingIdx] = { ...this.db.presenterApplications[existingIdx], ...newApp };
+    } else {
+      this.db.presenterApplications.unshift(newApp);
+    }
 
     // Also add a notification for coordinators
     if (this.db.notifications) {
@@ -2387,27 +2441,58 @@ class DataService {
     }
 
     this.saveDatabase();
+
+    // Send to centralized serverless API so coordinator receives it across all devices
+    try {
+      const apiUrl = this.getApplicationsApiUrl();
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'submitPresenterApplication', type: 'presenter', ...newApp })
+      }).then(() => {
+        if (typeof this.syncRemoteApplications === 'function') {
+          this.syncRemoteApplications();
+        }
+      }).catch(err => console.warn('Could not post presenter application to server API:', err));
+    } catch (e) {}
+
     return newApp;
   }
 
   approvePresenterApplication(appId) {
     if (!this.db.presenterApplications) this.db.presenterApplications = [];
-    const app = this.db.presenterApplications.find(a => a.id === appId);
+    const app = this.db.presenterApplications.find(a => 
+      (a.id && String(a.id).trim() === String(appId).trim()) || 
+      (a.email && a.email.toLowerCase().trim() === String(appId).toLowerCase().trim())
+    );
     if (!app) return null;
 
     app.status = 'Approved';
+    const cleanEmail = (app.email || '').toLowerCase().trim();
 
-    // Upgrade member's role to Presenter
-    let user = this.db.users.find(u => (app.userId && u.id === app.userId) || (app.email && u.email.toLowerCase() === app.email.toLowerCase()));
+    // Upgrade member's role to Presenter in users list
+    if (!Array.isArray(this.db.users)) this.db.users = [];
+    let user = this.db.users.find(u => (app.userId && u.id === app.userId) || (u.email && u.email.toLowerCase().trim() === cleanEmail));
     if (user) {
       user.role = 'Presenter';
+      user.isApprovedPresenter = true;
+    }
+
+    // Also mark in applications list
+    if (Array.isArray(this.db.applications)) {
+      const memberApp = this.db.applications.find(a => a.email && a.email.toLowerCase().trim() === cleanEmail);
+      if (memberApp) {
+        memberApp.role = 'Presenter';
+        memberApp.isApprovedPresenter = true;
+      }
     }
 
     // Sync active session if currently logged in user is the applicant
     if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
       const activeUser = window.GYD_AUTH.getCurrentUser();
-      if (activeUser && (activeUser.id === app.userId || activeUser.email.toLowerCase() === app.email.toLowerCase())) {
+      if (activeUser && (activeUser.id === app.userId || (activeUser.email && activeUser.email.toLowerCase().trim() === cleanEmail))) {
         activeUser.role = 'Presenter';
+        activeUser.isApprovedPresenter = true;
         window.GYD_AUTH.saveSession(activeUser);
       }
     }
@@ -2428,15 +2513,49 @@ class DataService {
 
     this.syncCommunityUsers();
     this.saveDatabase();
+
+    // Immediately sync approval to remote API
+    try {
+      const apiUrl = this.getApplicationsApiUrl();
+      fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updatePresenterStatus',
+          id: app.id,
+          email: app.email,
+          status: 'Approved'
+        })
+      }).catch(err => console.warn('Could not sync presenter approval to remote API', err));
+    } catch (e) {}
+
     return { app, user };
   }
 
   rejectPresenterApplication(appId) {
     if (!this.db.presenterApplications) this.db.presenterApplications = [];
-    const app = this.db.presenterApplications.find(a => a.id === appId);
+    const app = this.db.presenterApplications.find(a => 
+      (a.id && String(a.id).trim() === String(appId).trim()) || 
+      (a.email && a.email.toLowerCase().trim() === String(appId).toLowerCase().trim())
+    );
     if (app) {
       app.status = 'Rejected';
       this.saveDatabase();
+
+      try {
+        const apiUrl = this.getApplicationsApiUrl();
+        fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'updatePresenterStatus',
+            id: app.id,
+            email: app.email,
+            status: 'Rejected'
+          })
+        }).catch(err => console.warn('Could not sync presenter rejection to remote API', err));
+      } catch (e) {}
+
       return app;
     }
     return null;

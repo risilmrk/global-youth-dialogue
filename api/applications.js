@@ -263,6 +263,166 @@ function sendApplicantApprovalNotification(app) {
 
       socket.on('error', () => resolve(false));
       socket.setTimeout(10000, () => { socket.destroy(); resolve(false); });
+function sendAdminPresenterNotification(app) {
+  const user = 'thegyde.verify@gmail.com';
+  const pass = 'nwhnmkersbiwwrry';
+  const host = 'smtp.gmail.com';
+  const port = 465;
+
+  return new Promise((resolve) => {
+    try {
+      const socket = tls.connect(port, host, { minVersion: 'TLSv1.2' }, () => {});
+      socket.setEncoding('utf8');
+      let step = 0;
+
+      socket.on('data', (data) => {
+        const reply = data.toString();
+        if (step === 0 && reply.startsWith('220')) {
+          step = 1;
+          socket.write('EHLO thegyde.in\r\n');
+        } else if (step === 1 && reply.startsWith('250')) {
+          step = 2;
+          socket.write('AUTH LOGIN\r\n');
+        } else if (step === 2 && reply.startsWith('334')) {
+          step = 3;
+          socket.write(Buffer.from(user).toString('base64') + '\r\n');
+        } else if (step === 3 && reply.startsWith('334')) {
+          step = 4;
+          socket.write(Buffer.from(pass).toString('base64') + '\r\n');
+        } else if (step === 4 && reply.startsWith('235')) {
+          step = 5;
+          socket.write(`MAIL FROM:<${user}>\r\n`);
+        } else if (step === 5 && reply.startsWith('250')) {
+          step = 6;
+          socket.write(`RCPT TO:<3681mubashircp@gmail.com>\r\n`);
+        } else if (step === 6 && reply.startsWith('250')) {
+          step = 7;
+          socket.write('DATA\r\n');
+        } else if (step === 7 && reply.startsWith('354')) {
+          step = 8;
+          const subject = `[GYDE Presenter Request] ${app.name} (${app.country})`;
+          const body = [
+            `From: "GYDE Secretariat Alerts" <${user}>`,
+            `To: 3681mubashircp@gmail.com`,
+            `Subject: ${subject}`,
+            `MIME-Version: 1.0`,
+            `Content-Type: text/html; charset=UTF-8`,
+            '',
+            `<!DOCTYPE html><html><body style="font-family: sans-serif; padding: 20px; background: #f8fafc;">`,
+            `<div style="max-width: 540px; margin: 0 auto; background: #fff; padding: 24px; border-radius: 12px; border: 1px solid #e2e8f0;">`,
+            `<h3 style="color: #d97706; margin-top: 0;">New GYDE Presenter Accreditation Request</h3>`,
+            `<p><strong>Applicant Name:</strong> ${app.name}</p>`,
+            `<p><strong>Email Address:</strong> ${app.email}</p>`,
+            `<p><strong>Country:</strong> ${app.country}</p>`,
+            `<p><strong>Proposed Topic:</strong> "${app.proposedTopic || 'Academic Research Briefing'}"</p>`,
+            `<p><strong>Preferred Format:</strong> ${app.preferredFormat || '15-min Keynote'}</p>`,
+            `<p><strong>Speaking/Debate Experience:</strong> ${app.researchExperience || 'N/A'}</p>`,
+            `<p><strong>Academic Intent:</strong> "${app.statementOfIntent || 'N/A'}"</p>`,
+            app.dossierUrl ? `<p><strong>Research Dossier URL:</strong> <a href="${app.dossierUrl}" target="_blank">${app.dossierUrl}</a></p>` : '',
+            `<hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;">`,
+            `<p style="font-size: 13px; color: #64748b;">This request is waiting for your review in the Coordinator Dashboard under Official Presenter Accreditation Queue.</p>`,
+            `</div></body></html>`,
+            '',
+            '.'
+          ].filter(Boolean).join('\r\n') + '\r\n';
+          socket.write(body);
+        } else if (step === 8 && reply.startsWith('250')) {
+          step = 9;
+          socket.write('QUIT\r\n');
+          resolve(true);
+        } else if (reply.startsWith('5') || reply.startsWith('4')) {
+          socket.destroy();
+          resolve(false);
+        }
+      });
+
+      socket.on('error', () => resolve(false));
+      socket.setTimeout(10000, () => { socket.destroy(); resolve(false); });
+    } catch (e) {
+      resolve(false);
+    }
+  });
+}
+
+function sendPresenterApprovalNotification(app) {
+  const user = 'thegyde.verify@gmail.com';
+  const pass = 'nwhnmkersbiwwrry';
+  const host = 'smtp.gmail.com';
+  const port = 465;
+
+  return new Promise((resolve) => {
+    try {
+      if (!app || !app.email) return resolve(false);
+      const socket = tls.connect(port, host, { minVersion: 'TLSv1.2' }, () => {});
+      socket.setEncoding('utf8');
+      let step = 0;
+
+      socket.on('data', (data) => {
+        const reply = data.toString();
+        if (step === 0 && reply.startsWith('220')) {
+          step = 1;
+          socket.write('EHLO thegyde.in\r\n');
+        } else if (step === 1 && reply.startsWith('250')) {
+          step = 2;
+          socket.write('AUTH LOGIN\r\n');
+        } else if (step === 2 && reply.startsWith('334')) {
+          step = 3;
+          socket.write(Buffer.from(user).toString('base64') + '\r\n');
+        } else if (step === 3 && reply.startsWith('334')) {
+          step = 4;
+          socket.write(Buffer.from(pass).toString('base64') + '\r\n');
+        } else if (step === 4 && reply.startsWith('235')) {
+          step = 5;
+          socket.write(`MAIL FROM:<${user}>\r\n`);
+        } else if (step === 5 && reply.startsWith('250')) {
+          step = 6;
+          socket.write(`RCPT TO:<${app.email}>\r\n`);
+        } else if (step === 6 && reply.startsWith('250')) {
+          step = 7;
+          socket.write('DATA\r\n');
+        } else if (step === 7 && reply.startsWith('354')) {
+          step = 8;
+          const subject = `Your GYDE Presenter Accreditation is Approved!`;
+          const body = [
+            `From: "Global Youth Dialogue & Exchange (GYDE)" <${user}>`,
+            `To: ${app.email}`,
+            `Subject: ${subject}`,
+            `MIME-Version: 1.0`,
+            `Content-Type: text/html; charset=UTF-8`,
+            '',
+            `<!DOCTYPE html><html><body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; margin: 0; padding: 24px; color: #1e293b;">`,
+            `<div style="max-width: 520px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">`,
+            `<div style="background: linear-gradient(135deg, #1e1b4b, #d97706); color: #ffffff; padding: 26px 20px; text-align: center;">`,
+            `<h2 style="margin: 0 0 6px 0; font-size: 1.3rem;">Global Youth Dialogue & Exchange</h2>`,
+            `<p style="margin: 0; font-size: 0.88rem; color: #fde68a;">Official Presenter Accreditation</p>`,
+            `</div>`,
+            `<div style="padding: 28px 24px;">`,
+            `<div style="font-size: 1.05rem; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Dear ${app.name || 'Delegate'},</div>`,
+            `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">Congratulations! Your request to lead dialogue sessions as an Official Accredited Presenter in Global Youth Dialogue & Exchange has been <strong>approved</strong>!</p>`,
+            `<p style="font-size: 0.95rem; color: #475569; line-height: 1.6;">You now have full access to the Presenter Portal to deliver keynote briefings, curate topics from the Topic Bank, and attach academic slide decks.</p>`,
+            `<div style="text-align: center; margin: 26px 0;">`,
+            `<a href="https://www.thegyde.in/#signin" style="display: inline-block; background: #d97706; color: #ffffff; padding: 12px 26px; border-radius: 8px; text-decoration: none; font-weight: 700;">Sign In to Presenter Portal &rarr;</a>`,
+            `</div>`,
+            `</div>`,
+            `<div style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 16px; font-size: 0.78rem; color: #94a3b8; text-align: center;">`,
+            `&copy; Global Youth Dialogue & Exchange (GYDE) &bull; <a href="https://www.thegyde.in" style="color: #d97706; text-decoration: none;">thegyde.in</a>`,
+            `</div></div></body></html>`,
+            '',
+            '.'
+          ].join('\r\n') + '\r\n';
+          socket.write(body);
+        } else if (step === 8 && reply.startsWith('250')) {
+          step = 9;
+          socket.write('QUIT\r\n');
+          resolve(true);
+        } else if (reply.startsWith('5') || reply.startsWith('4')) {
+          socket.destroy();
+          resolve(false);
+        }
+      });
+
+      socket.on('error', () => resolve(false));
+      socket.setTimeout(10000, () => { socket.destroy(); resolve(false); });
     } catch (e) {
       resolve(false);
     }
@@ -346,6 +506,107 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: false, message: 'No matching application to update password.' });
       }
 
+      // Handle Presenter Application Submission (action: 'submitPresenterApplication' or type: 'presenter')
+      if (body.action === 'submitPresenterApplication' || (body.type === 'presenter' && body.action !== 'updatePresenterStatus' && body.action !== 'updateStatus') || (body.id && String(body.id).startsWith('papp_') && body.action !== 'updatePresenterStatus' && body.action !== 'updateStatus')) {
+        const name = (body.name || '').trim();
+        const email = (body.email || '').trim().toLowerCase();
+        const country = (body.country || 'Global').trim();
+
+        if (!name || !email) {
+          return res.status(400).json({ error: 'Name and email are required.' });
+        }
+
+        const presApp = {
+          id: body.id || ('papp_' + Date.now().toString(36)),
+          userId: body.userId || null,
+          name,
+          email,
+          country,
+          flag: body.flag || 'INT',
+          primarySpheres: Array.isArray(body.primarySpheres) ? body.primarySpheres : [],
+          proposedTopic: body.proposedTopic || 'Academic Research Briefing',
+          researchExperience: body.researchExperience || '',
+          dossierUrl: body.dossierUrl || '',
+          preferredFormat: body.preferredFormat || '15-min Keynote Briefing',
+          statementOfIntent: body.statementOfIntent || '',
+          status: body.status || 'Pending',
+          type: 'presenter',
+          date: body.date || new Date().toISOString().split('T')[0]
+        };
+
+        const existingIdx = globalApplications.findIndex(a => 
+          (a.type === 'presenter' || (a.id && String(a.id).startsWith('papp_'))) && 
+          ((a.id && a.id === presApp.id) || (a.email && a.email.toLowerCase().trim() === email))
+        );
+
+        if (existingIdx >= 0) {
+          globalApplications[existingIdx] = {
+            ...globalApplications[existingIdx],
+            ...presApp
+          };
+        } else {
+          globalApplications.unshift(presApp);
+        }
+
+        await persistApplications();
+
+        try {
+          await Promise.race([
+            sendAdminPresenterNotification(presApp),
+            new Promise(r => setTimeout(() => r(false), 3000))
+          ]);
+        } catch (e) {}
+
+        return res.status(200).json({
+          success: true,
+          message: 'Presenter accreditation request recorded successfully.',
+          application: presApp
+        });
+      }
+
+      // Handle Presenter Status Updates (action: 'updatePresenterStatus')
+      if (body.action === 'updatePresenterStatus') {
+        const targetId = (body.id || '').trim();
+        const targetEmail = (body.email || '').trim().toLowerCase();
+        const newStatus = body.status || 'Approved';
+
+        const match = globalApplications.find(a => 
+          (a.type === 'presenter' || (a.id && String(a.id).startsWith('papp_'))) &&
+          ((targetId && a.id === targetId) || (targetEmail && a.email && a.email.toLowerCase().trim() === targetEmail))
+        );
+
+        if (match) {
+          match.status = newStatus;
+          await persistApplications();
+
+          if (newStatus === 'Approved') {
+            const memberMatch = globalApplications.find(a => 
+              a.type !== 'presenter' && 
+              a.email && 
+              a.email.toLowerCase().trim() === targetEmail
+            );
+            if (memberMatch) {
+              memberMatch.role = 'Presenter';
+              memberMatch.isApprovedPresenter = true;
+            }
+            await persistApplications();
+
+            try {
+              await Promise.race([
+                sendPresenterApprovalNotification(match),
+                new Promise(r => setTimeout(() => r(false), 4000))
+              ]);
+            } catch (e) {}
+          }
+
+          return res.status(200).json({
+            success: true,
+            message: `Presenter application status updated to "${newStatus}"`,
+            application: match
+          });
+        }
+      }
+
       // Handle Status Updates from Coordinator Dashboard (e.g. Approved / Rejected)
       const isExplicitStatusUpdate = (body.action === 'updateStatus' || body.action === 'update');
       const isStatusOnlyUpdate = (!body.name && body.status && (body.id || body.email));
@@ -370,10 +631,27 @@ module.exports = async function handler(req, res) {
           // If approved, notify applicant via email
           if (newStatus === 'Approved') {
             try {
-              await Promise.race([
-                sendApplicantApprovalNotification(match),
-                new Promise(r => setTimeout(() => r(false), 4000))
-              ]);
+              if (match.type === 'presenter' || (match.id && String(match.id).startsWith('papp_'))) {
+                const memberMatch = globalApplications.find(a => 
+                  a.type !== 'presenter' && 
+                  a.email && 
+                  a.email.toLowerCase().trim() === (match.email || '').toLowerCase().trim()
+                );
+                if (memberMatch) {
+                  memberMatch.role = 'Presenter';
+                  memberMatch.isApprovedPresenter = true;
+                }
+                await persistApplications();
+                await Promise.race([
+                  sendPresenterApprovalNotification(match),
+                  new Promise(r => setTimeout(() => r(false), 4000))
+                ]);
+              } else {
+                await Promise.race([
+                  sendApplicantApprovalNotification(match),
+                  new Promise(r => setTimeout(() => r(false), 4000))
+                ]);
+              }
             } catch (e) {}
           }
 

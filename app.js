@@ -2034,6 +2034,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update Green "Be a Presenter" Menu Button State
     updateMemberPresenterButtonState();
 
+    // Pull latest presenter application status from cloud API
+    if (dataService && typeof dataService.syncRemoteApplications === 'function') {
+      dataService.syncRemoteApplications().then(() => {
+        updateMemberPresenterButtonState();
+      }).catch(() => {});
+    }
+
     // Bind Member Navigation
     bindMemberNavigation();
 
@@ -2059,6 +2066,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const isPending = !isApproved && (app && app.status === 'Pending');
 
     if (isApproved) {
+      if (user.role !== 'Presenter') {
+        user.role = 'Presenter';
+        user.isApprovedPresenter = true;
+        authService.saveSession(user);
+      }
       if (textEl) textEl.textContent = 'Presenter Portal →';
       if (btn) {
         btn.className = 'btn-be-presenter status-approved';

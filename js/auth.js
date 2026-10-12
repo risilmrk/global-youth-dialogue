@@ -254,6 +254,19 @@ class AuthService {
     }
 
     // --- Role-portal gatekeeping ---
+    const hasApprovedPresApp = (
+      user.role === 'Presenter' ||
+      user.role === 'Speaker' ||
+      user.isApprovedPresenter === true ||
+      (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.presenterApplications) && 
+        window.GYD_DATA.db.presenterApplications.some(p => p.email && p.email.toLowerCase().trim() === cleanEmail && p.status === 'Approved'))
+    );
+    if (hasApprovedPresApp && user.role !== 'Coordinator' && user.role !== 'Admin' && cleanEmail !== '3681mubashircp@gmail.com') {
+      user.role = 'Presenter';
+      user.isApprovedPresenter = true;
+      if (window.GYD_DATA && typeof window.GYD_DATA.saveDatabase === 'function') window.GYD_DATA.saveDatabase();
+    }
+
     const isAdmin = (
       user.role === 'Coordinator' ||
       user.role === 'Admin' ||
