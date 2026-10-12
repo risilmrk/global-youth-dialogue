@@ -16,19 +16,11 @@
     "date": "2026-10-12"
   },
   {
-    "id": "app_mv5gi91e",
+    "id": "usr_mv5gi91e",
     "email": "thegyde.in@gmail.com",
-    "name": "Mubashir Cp",
-    "password": "147147",
-    "status": "Approved",
-    "date": "2026-10-12",
-    "country": "India",
-    "flag": "INT",
-    "interests": [
-      "aehrgbf"
-    ],
-    "debateExperience": "qwertyui",
-    "motivation": "qwertyui",
-    "emailVerified": true
+    "name": "Removed User",
+    "password": "",
+    "status": "Deleted",
+    "date": "2026-10-12"
   }
 ]
