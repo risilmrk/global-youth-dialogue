@@ -1,5 +1,15 @@
 [
   {
+    "id": "app_mv578nup",
+    "name": "Member",
+    "email": "dharabicdebateclub@gmail.com",
+    "password": "",
+    "country": "Global",
+    "flag": "INT",
+    "status": "Rejected",
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_mv5lmdj7",
     "name": "Bushrabi PP",
     "email": "kvkaveshajahan7@gmail.com",
