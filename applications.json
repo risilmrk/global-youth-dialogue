@@ -31,7 +31,7 @@
   },
   {
     "id": "app_muzw3l9n",
-    "name": "Sümeyye Bulut",
+    "name": "S\u00fcmeyye Bulut",
     "email": "sumeyye.bulut@stu.ihu.edu.tr",
     "country": "Turkey",
     "flag": "TR",
@@ -133,21 +133,5 @@
     "motivation": "Excited to engage with international thinkers on geopolitical mediation and publish collaborative youth research papers.",
     "status": "Approved - Awaiting Registration",
     "date": "2024-10-08"
-  },
-  {
-    "id": "app_mv4tdc3q",
-    "name": "Demo Applicant",
-    "email": "test_demo_applicant_42@example.com",
-    "password": "",
-    "country": "Norway",
-    "flag": "INT",
-    "interests": [
-      "Global Affairs"
-    ],
-    "debateExperience": "National youth debater",
-    "motivation": "Excited for global youth discourse",
-    "status": "Pending",
-    "emailVerified": true,
-    "date": "2026-10-12"
   }
 ]
