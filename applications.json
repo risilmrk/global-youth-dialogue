@@ -20,11 +20,19 @@
     "date": "2026-10-12"
   },
   {
-    "id": "usr_mv5lmdj7",
+    "id": "app_mv5lr7t8",
     "email": "kvkaveshajahan7@gmail.com",
-    "name": "Removed User",
-    "password": "",
-    "status": "Deleted",
-    "date": "2026-10-12"
+    "name": "Bushrabi PP",
+    "password": "789456",
+    "status": "Pending",
+    "date": "2026-10-12",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs"
+    ],
+    "debateExperience": "ewwwwwwwww",
+    "motivation": "eWAdwwefeswfwe",
+    "emailVerified": true
   }
 ]
