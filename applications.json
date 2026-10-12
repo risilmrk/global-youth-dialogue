@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv4tisyk",
+    "name": "Zainab Demo Applicant",
+    "email": "zainab_demo_live_test@example.com",
+    "password": "demo_secure_pass_123",
+    "country": "Oman",
+    "flag": "OM",
+    "interests": [
+      "Global Affairs"
+    ],
+    "debateExperience": "Regional Debater",
+    "motivation": "Excited to join GYDE community",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_sagia_asadien",
     "name": "Sagia Saasadien",
     "email": "sagiasaasadien@gmail.com",
