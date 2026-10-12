@@ -367,11 +367,13 @@ document.addEventListener('DOMContentLoaded', () => {
       drawer.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
 
-      if (wasActive && drawerHistoryActive && triggerHistoryBack && !isNavigatingBack && history.state && history.state.type === 'drawer') {
+      if (wasActive && drawerHistoryActive) {
         drawerHistoryActive = false;
-        try {
-          history.back();
-        } catch (e) {}
+        if (triggerHistoryBack && !isNavigatingBack && history.state && history.state.type === 'drawer') {
+          try {
+            history.back();
+          } catch (e) {}
+        }
       } else {
         drawerHistoryActive = false;
       }
@@ -498,12 +500,14 @@ document.addEventListener('DOMContentLoaded', () => {
           <button class="btn btn-outline" id="mobileDrawerLoginBtn" style="width: 100%;">${loginText}</button>
           <button class="btn btn-primary" id="mobileDrawerJoinBtn" style="width: 100%;">${isAr ? 'تقديم طلب عضوية' : 'Apply for Membership'}</button>
         `;
-        document.getElementById('mobileDrawerLoginBtn')?.addEventListener('click', () => {
-          closeMobileDrawer();
+        document.getElementById('mobileDrawerLoginBtn')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeMobileDrawer(false);
           navigateToPortal('signin');
         });
-        document.getElementById('mobileDrawerJoinBtn')?.addEventListener('click', () => {
-          closeMobileDrawer();
+        document.getElementById('mobileDrawerJoinBtn')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          closeMobileDrawer(false);
           openUnifiedApplyModal();
         });
       }
@@ -638,16 +642,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     nav.querySelectorAll('a[href^="#"]').forEach(link => {
       link.addEventListener('click', (e) => {
-        const hash = link.getAttribute('href');
-        if (hash && hash !== '#') {
-          closeMobileDrawer();
-          if (activePortal !== 'public') {
-            navigateToPortal('public');
-          }
-          const targetEl = document.querySelector(hash);
-          if (targetEl) {
-            setTimeout(() => targetEl.scrollIntoView({ behavior: 'smooth' }), 50);
-          }
+        e.preventDefault();
+        const hash = (link.getAttribute('href') || '').replace(/^#/, '');
+        closeMobileDrawer(false);
+        if (activePortal !== 'public') {
+          navigateToPortal('public', false);
+        }
+        if (typeof switchPublicSection === 'function') {
+          switchPublicSection(hash || 'home', true);
         }
       });
     });
@@ -1549,9 +1551,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function switchPublicSection(sectionId, pushHistory = true) {
     const rawId = (sectionId || 'home').replace(/^#/, '');
+    const isProcess = (rawId === 'process');
     const validSections = ['home', 'about', 'topics', 'sessions', 'impact'];
-    const targetId = validSections.includes(rawId) ? rawId : 'home';
+    const targetId = isProcess ? 'about' : (validSections.includes(rawId) ? rawId : 'home');
     currentPublicSection = targetId;
+
+    if (activePortal !== 'public') {
+      navigateToPortal('public', false);
+    }
 
     // Toggle active classes and inline display on public section panels
     const sections = document.querySelectorAll('#viewPublic .public-section');
@@ -1568,7 +1575,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update active nav link indicators
     document.querySelectorAll('#publicNav .nav-link, #mobileNavDrawer .mobile-nav-link, .site-footer a[href^="#"]').forEach(link => {
       const href = link.getAttribute('href');
-      if (href === `#${targetId}`) {
+      if (href === `#${rawId}` || (isProcess && href === '#process')) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');
@@ -1578,20 +1585,32 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close mobile drawer if open
     closeMobileDrawer(false);
 
-    // Scroll window smoothly to top of the view
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Scroll window smoothly to target
+    if (isProcess) {
+      setTimeout(() => {
+        const procEl = document.getElementById('process');
+        if (procEl) {
+          procEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      }, 100);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 
-    // Update URL hash cleanly and push browser history so Back button goes to previous section!
+    // Update URL hash cleanly and push browser history
     const currentHash = (window.location.hash || '').replace(/^#/, '');
-    if (currentHash !== targetId) {
+    const hashToSet = isProcess ? 'process' : targetId;
+    if (currentHash !== hashToSet) {
       try {
         if (pushHistory && !isNavigatingBack) {
-          history.pushState({ type: 'section', portal: 'public', section: targetId }, '', `#${targetId}`);
+          history.pushState({ type: 'section', portal: 'public', section: hashToSet }, '', `#${hashToSet}`);
         } else {
-          history.replaceState({ type: 'section', portal: 'public', section: targetId }, '', `#${targetId}`);
+          history.replaceState({ type: 'section', portal: 'public', section: hashToSet }, '', `#${hashToSet}`);
         }
       } catch (e) {
-        window.location.hash = `#${targetId}`;
+        window.location.hash = `#${hashToSet}`;
       }
     }
   }
@@ -1607,6 +1626,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const dataNav = navLink.getAttribute('data-public-nav');
     if (dataNav) {
       e.preventDefault();
+      closeMobileDrawer(false);
       switchPublicSection(dataNav);
       return;
     }
@@ -1614,9 +1634,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const href = navLink.getAttribute('href');
     if (href && href.startsWith('#')) {
       const target = href.replace(/^#/, '');
-      const valid = ['home', 'about', 'topics', 'sessions', 'impact'];
+      const valid = ['home', 'about', 'process', 'topics', 'sessions', 'impact'];
       if (valid.includes(target)) {
         e.preventDefault();
+        closeMobileDrawer(false);
         switchPublicSection(target);
       }
     }
@@ -7569,7 +7590,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (parts[1] && typeof switchPresenterSubview === 'function') switchPresenterSubview(parts[1], false);
       } else {
         const valid = ['about', 'topics', 'sessions', 'impact'];
-        const section = valid.includes(rawHash) ? rawHash : 'home';
+        const isProc = (rawHash === 'process');
+        const section = isProc ? 'process' : (valid.includes(rawHash) ? rawHash : 'home');
         if (activePortal !== 'public') navigateToPortal('public', false);
         switchPublicSection(section, false);
       }
@@ -7591,9 +7613,10 @@ document.addEventListener('DOMContentLoaded', () => {
       switchPublicSection('home', false);
     } else {
       const valid = ['about', 'topics', 'sessions', 'impact'];
-      if (valid.includes(rawHash)) {
+      const isProc = (rawHash === 'process');
+      if (isProc || valid.includes(rawHash)) {
         if (activePortal !== 'public') navigateToPortal('public', false);
-        switchPublicSection(rawHash, false);
+        switchPublicSection(isProc ? 'process' : rawHash, false);
       }
     }
   });
