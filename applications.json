@@ -1,5 +1,22 @@
 [
   {
+    "id": "app_mv4ton24",
+    "name": "Pixo Lab",
+    "email": "pixolab.creative@gmail.com",
+    "password": "123456",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "ssssssssss"
+    ],
+    "debateExperience": "sssssssssss",
+    "motivation": "ssssssss",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_mv4tdc3q",
     "name": "Member",
     "email": "test_demo_applicant_42@example.com",
