@@ -263,6 +263,12 @@ function sendApplicantApprovalNotification(app) {
 
       socket.on('error', () => resolve(false));
       socket.setTimeout(10000, () => { socket.destroy(); resolve(false); });
+    } catch (e) {
+      resolve(false);
+    }
+  });
+}
+
 function sendAdminPresenterNotification(app) {
   const user = 'thegyde.verify@gmail.com';
   const pass = 'nwhnmkersbiwwrry';
