@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv4u2jqs",
+    "name": "rafi ks",
+    "email": "rafithodupuzha74@gmail.com",
+    "password": "147147",
+    "country": "india",
+    "flag": "INT",
+    "interests": [
+      "Education & Knowledge"
+    ],
+    "debateExperience": "rsdgn",
+    "motivation": "dym",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-12"
+  },
+  {
     "id": "app_mv4ton24",
     "name": "Pixo Lab",
     "email": "pixolab.creative@gmail.com",
