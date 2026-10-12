@@ -1,42 +1,5 @@
 [
   {
-    "id": "papp_mv5mngvi",
-    "userId": "usr_mv5mmo5q",
-    "name": "Riswan CKD",
-    "email": "riswankckd@gmail.com",
-    "country": "India Delegation",
-    "flag": "INT",
-    "primarySpheres": [
-      "global-affairs"
-    ],
-    "proposedTopic": "ASDFGHJLK;'",
-    "researchExperience": "ESSDFGHJLK;",
-    "dossierUrl": "",
-    "preferredFormat": "15-min Keynote Briefing",
-    "statementOfIntent": "Qasdfghjkl;.",
-    "status": "Pending",
-    "type": "presenter",
-    "date": "2026-10-12"
-  },
-  {
-    "id": "app_mv5mmo5q",
-    "name": "Riswan CKD",
-    "email": "riswankckd@gmail.com",
-    "password": "456123",
-    "country": "India",
-    "flag": "INT",
-    "interests": [
-      "Education & Knowledge"
-    ],
-    "debateExperience": "dxcfvn,m,.",
-    "motivation": "szxdcbnm,.",
-    "status": "Approved",
-    "emailVerified": true,
-    "date": "2026-10-12",
-    "role": "Presenter",
-    "isApprovedPresenter": true
-  },
-  {
     "id": "papp_mv5lsebc",
     "userId": "usr_mv5lr7t8",
     "name": "Bushrabi PP",
@@ -92,5 +55,13 @@
     "emailVerified": true,
     "role": "Presenter",
     "isApprovedPresenter": true
+  },
+  {
+    "id": "usr_mv5mmo5q",
+    "email": "riswankckd@gmail.com",
+    "name": "Removed User",
+    "password": "",
+    "status": "Deleted",
+    "date": "2026-10-12"
   }
 ]
