@@ -14,7 +14,7 @@
     "dossierUrl": "",
     "preferredFormat": "15-min Keynote Briefing",
     "statementOfIntent": "Qasdfghjkl;.",
-    "status": "Approved",
+    "status": "Pending",
     "type": "presenter",
     "date": "2026-10-12"
   },
@@ -32,7 +32,9 @@
     "motivation": "szxdcbnm,.",
     "status": "Approved",
     "emailVerified": true,
-    "date": "2026-10-12"
+    "date": "2026-10-12",
+    "role": "Presenter",
+    "isApprovedPresenter": true
   },
   {
     "id": "papp_mv5lsebc",
