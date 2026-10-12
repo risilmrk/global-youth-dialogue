@@ -1873,6 +1873,9 @@ class DataService {
 
   getApplicationsApiUrl() {
     if (typeof window !== 'undefined' && window.location) {
+      if (window.location.protocol === 'file:') {
+        return 'https://www.thegyde.in/api/applications';
+      }
       return '/api/applications';
     }
     return 'https://www.thegyde.in/api/applications';
@@ -1930,9 +1933,15 @@ class DataService {
           });
           this.syncCommunityUsers();
           this.saveDatabase();
-          if (typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
-          if (typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
-          if (typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
+          if (typeof window.renderCoordDashboardContent === 'function') window.renderCoordDashboardContent();
+          else if (typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
+
+          if (typeof window.renderCoordApplicationsList === 'function') window.renderCoordApplicationsList();
+          else if (typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
+
+          if (typeof window.renderCoordCommunityRoster === 'function') window.renderCoordCommunityRoster();
+          else if (typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
+
           if (typeof window.checkApprovedApplicantNotice === 'function') window.checkApprovedApplicantNotice();
         }
       }
@@ -2257,6 +2266,10 @@ class DataService {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'submitApplication', ...newApp })
+      }).then(() => {
+        if (typeof this.syncRemoteApplications === 'function') {
+          this.syncRemoteApplications();
+        }
       }).catch(err => console.warn('Could not post application to server API:', err));
     } catch (e) {}
 

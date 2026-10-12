@@ -4637,7 +4637,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (targetName === 'dashboard' || targetName === 'applications' || targetName === 'community') {
       if (dataService && typeof dataService.syncRemoteApplications === 'function') {
-        dataService.syncRemoteApplications();
+        dataService.syncRemoteApplications().then(() => {
+          if (currentCoordSubview === 'applications' && typeof renderCoordApplicationsList === 'function') renderCoordApplicationsList();
+          if (currentCoordSubview === 'dashboard' && typeof renderCoordDashboardContent === 'function') renderCoordDashboardContent();
+          if (currentCoordSubview === 'community' && typeof renderCoordCommunityRoster === 'function') renderCoordCommunityRoster();
+        }).catch(() => {});
       }
     }
 
@@ -4795,6 +4799,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     }
   }
+  window.renderCoordDashboardContent = renderCoordDashboardContent;
 
   // --- Subview: Coordinator Topics Management ---
   function renderCoordTopicsList() {
@@ -5734,6 +5739,7 @@ document.addEventListener('DOMContentLoaded', () => {
       declinedListEl.innerHTML = declinedHtml || `<div style="color: var(--text-muted); padding: 0.8rem 0;">No declined applications in the archive.</div>`;
     }
   }
+  window.renderCoordApplicationsList = renderCoordApplicationsList;
 
   // --- Subview: Coordinator Team Roster ---
   function renderCoordTeamList() {
