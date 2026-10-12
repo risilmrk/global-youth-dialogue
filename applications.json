@@ -1,10 +1,18 @@
 [
   {
-    "id": "usr_mv5haypd",
+    "id": "app_mv5hjow3",
     "email": "justniyas@gmail.com",
-    "name": "Removed User",
-    "password": "",
-    "status": "Deleted",
-    "date": "2026-10-12"
+    "name": "Just Niyas",
+    "password": "123123",
+    "status": "Pending",
+    "date": "2026-10-12",
+    "country": "india",
+    "flag": "INT",
+    "interests": [
+      "Education & Knowledge"
+    ],
+    "debateExperience": "gcyjhfghj",
+    "motivation": "dryjntfgyh",
+    "emailVerified": true
   }
 ]
