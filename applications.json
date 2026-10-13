@@ -1,5 +1,22 @@
 [
   {
+    "id": "app_mv6nbfqr",
+    "name": "Sümeyye Bulut",
+    "email": "sumeyye.bulut@stu.ihu.edu.tr",
+    "password": "542008.Hfz",
+    "country": "Türkiye",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Governance & Society"
+    ],
+    "debateExperience": "7th ınternational debate in Qatar\n2th Europe championaship in İstanbul\n7th national debate in Türkiye\nMUN as delegate and under secretary general\n(al of them in Arabic language)",
+    "motivation": "I want to improve myself about global issues and Arabic language",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6m3tdy",
     "name": "ساجية حسين",
     "email": "sagiasaadadien@gmail.com",
