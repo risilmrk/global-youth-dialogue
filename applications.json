@@ -1,5 +1,25 @@
 [
   {
+    "id": "app_mv6rkjrh",
+    "name": "Muhammed Risil",
+    "email": "risilbinmusthafa@gmail.com",
+    "password": "Risil@2610",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Education & Knowledge",
+      "Environment & Climate",
+      "Economy & Trade"
+    ],
+    "debateExperience": "Nothing",
+    "motivation": "forFun",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6qz5k5",
     "name": "Bayan El Kurdi",
     "email": "kurdib523@gmail.com",
