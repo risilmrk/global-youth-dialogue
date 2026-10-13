@@ -16,7 +16,9 @@
     "motivation": "To share thoughts and opinions with different cultures and to get know them more.",
     "status": "Pending",
     "emailVerified": true,
-    "date": "2026-10-13"
+    "date": "2026-10-13",
+    "role": "Presenter",
+    "isApprovedPresenter": true
   },
   {
     "id": "app_mv6nbfqr",
