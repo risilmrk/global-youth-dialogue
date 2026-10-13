@@ -16,16 +16,6 @@
     "date": "2026-10-13"
   },
   {
-    "id": "app_mv578nup",
-    "name": "Member",
-    "email": "dharabicdebateclub@gmail.com",
-    "password": "gyde2024",
-    "country": "Global",
-    "flag": "INT",
-    "status": "Approved",
-    "date": "2026-10-12"
-  },
-  {
     "id": "app_mv5lfplh",
     "name": "Member",
     "email": "test.delegate@example.com",
@@ -50,5 +40,13 @@
     "password": "",
     "status": "Deleted",
     "date": "2026-10-12"
+  },
+  {
+    "id": "usr_mv578nup",
+    "email": "dharabicdebateclub@gmail.com",
+    "name": "Removed User",
+    "password": "",
+    "status": "Deleted",
+    "date": "2026-10-13"
   }
 ]
