@@ -1,5 +1,24 @@
 [
   {
+    "id": "app_mv6quhqq",
+    "name": "Bayan El Kurdi",
+    "email": "kurdib523@gmail.com",
+    "password": "kur@di_B07!",
+    "country": "Lebanon",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Education & Knowledge",
+      "Environment & Climate",
+      "Governance & Society"
+    ],
+    "debateExperience": "1- Ranked first as Best Speaker representing the American University of Beirut at the university-level debate championship.\n2- Ranked second as Best Speaker at the school-level debate championship.\n3- Participated in the international championship in Qatar representing Lebanon; the team secured sixth place.\n4- Debate coach.\n5- MUN previous delegate and advisor",
+    "motivation": "To share thoughts and opinions with different cultures and to get know more about them.",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6nbfqr",
     "name": "Sümeyye Bulut",
     "email": "sumeyye.bulut@stu.ihu.edu.tr",
