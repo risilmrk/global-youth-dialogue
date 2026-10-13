@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv68edh8",
+    "name": "Riswan CKD",
+    "email": "riswankckd@gmail.com",
+    "password": "123456",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs"
+    ],
+    "debateExperience": "ewsfdcgb",
+    "motivation": "dgfhgbhjnm",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv64miur",
     "name": "Muhammed Niyas K",
     "email": "justniyas@gmail.com",
@@ -86,14 +102,6 @@
     "status": "Pending",
     "emailVerified": true,
     "date": "2026-10-13"
-  },
-  {
-    "id": "usr_mv5mmo5q",
-    "email": "riswankckd@gmail.com",
-    "name": "Removed User",
-    "password": "",
-    "status": "Deleted",
-    "date": "2026-10-12"
   },
   {
     "id": "usr_mv5lr7t8",
