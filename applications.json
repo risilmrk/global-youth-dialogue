@@ -1,5 +1,26 @@
 [
   {
+    "id": "app_mv6jt05t",
+    "name": "Zineb chahed Haffaci",
+    "email": "chahedhaffaci@gmail.com",
+    "password": "chahouuda2008",
+    "country": "Algeria",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Education & Knowledge",
+      "Environment & Climate",
+      "Economy & Trade",
+      "Governance & Society"
+    ],
+    "debateExperience": "Qatar debate",
+    "motivation": "To learn new skills",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6iqmtn",
     "name": "Rana Ali AbdElazeem",
     "email": "ranaali.o644@gmail.com",
