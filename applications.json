@@ -1,5 +1,22 @@
 [
   {
+    "id": "app_mv6lokgc",
+    "name": "Shoucky Xd",
+    "email": "shouckyxd@gmail.com",
+    "password": "shouckyndr4ever",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Governance & Society"
+    ],
+    "debateExperience": "Beginner in BP debate",
+    "motivation": "Want to make some awesome changes",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6ksuke",
     "name": "Lamar Emad Dauod",
     "email": "lamaremad514@gmail.com",
