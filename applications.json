@@ -1,5 +1,23 @@
 [
   {
+    "id": "app_mv6iqmtn",
+    "name": "Rana Ali AbdElazeem",
+    "email": "ranaali.o644@gmail.com",
+    "password": "Ranaali@12345",
+    "country": "Sudan",
+    "flag": "INT",
+    "interests": [
+      "Technology & AI",
+      "Education & Knowledge",
+      "Environment & Climate"
+    ],
+    "debateExperience": "Qatar debates, high school debater, coach and judg sometimes",
+    "motivation": "Because I’m interested in growing my skills more and more",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6gpurj",
     "name": "Menna Hassuna",
     "email": "mennahassuna@gmail.com",
