@@ -35,7 +35,9 @@
     "motivation": "I want to improve myself about global issues and Arabic language",
     "status": "Pending",
     "emailVerified": true,
-    "date": "2026-10-13"
+    "date": "2026-10-13",
+    "role": "Presenter",
+    "isApprovedPresenter": true
   },
   {
     "id": "app_mv6m3tdy",
