@@ -29,10 +29,10 @@
     "id": "app_mv5lfplh",
     "name": "Member",
     "email": "test.delegate@example.com",
-    "password": "",
+    "password": "gyde2024",
     "country": "Global",
     "flag": "INT",
-    "status": "Rejected",
+    "status": "Approved",
     "date": "2026-10-12"
   },
   {
