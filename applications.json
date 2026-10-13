@@ -1,5 +1,26 @@
 [
   {
+    "id": "app_mv6ksuke",
+    "name": "Lamar Emad Dauod",
+    "email": "lamaremad514@gmail.com",
+    "password": "imlamaremad",
+    "country": "Jordan",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Education & Knowledge",
+      "Environment & Climate",
+      "Economy & Trade",
+      "Governance & Society"
+    ],
+    "debateExperience": "Qatar debatesss",
+    "motivation": ",,,,,",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6kkoj6",
     "name": "Jwan Haitham",
     "email": "jwanly462@gmail.com",
