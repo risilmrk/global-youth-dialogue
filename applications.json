@@ -13,7 +13,9 @@
     "motivation": "I want to join GYD to exchange ideas with young people worldwide, broaden my global perspective, and contribute to meaningful discussions and academic writing on international issues",
     "status": "Pending",
     "emailVerified": true,
-    "date": "2026-10-13"
+    "date": "2026-10-13",
+    "role": "Presenter",
+    "isApprovedPresenter": true
   },
   {
     "id": "app_mv6rkjrh",
