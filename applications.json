@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv6vqybh",
+    "name": "Atheer Kamal",
+    "email": "atheerkamal680@gmail.com",
+    "password": "Atheer155",
+    "country": "Sudan",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs"
+    ],
+    "debateExperience": "I am a Sudanese debater, Best Speaker in the Sudan School Debates 2025 and Second Best Speaker in 2023. I represented Sudan at the 7th International Schools Debating Championship in Qatar",
+    "motivation": "I want to join GYD to exchange ideas with young people worldwide, broaden my global perspective, and contribute to meaningful discussions and academic writing on international issues",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6rkjrh",
     "name": "Muhammed Risil",
     "email": "risilbinmusthafa@gmail.com",
