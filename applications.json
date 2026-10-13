@@ -1,5 +1,24 @@
 [
   {
+    "id": "app_mv64miur",
+    "name": "Muhammed Niyas K",
+    "email": "justniyas@gmail.com",
+    "password": "123456",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Education & Knowledge",
+      "Governance & Society"
+    ],
+    "debateExperience": "Nothing",
+    "motivation": "For academic purpose",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv64f9dh",
     "name": "Najid Muhammed Ali",
     "email": "najidmhdali@gmail.com",
