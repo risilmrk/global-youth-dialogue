@@ -1384,28 +1384,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const code = authService.generateOTP(unifiedApplyData.email);
     const recipientEl = document.getElementById('applyOtpRecipientEmail');
     const inputEl = document.getElementById('applyOtpInput');
-    const revealedEl = document.getElementById('revealedApplyOtp');
-    const btnReveal = document.getElementById('btnRevealApplyOtp');
 
     if (recipientEl) recipientEl.textContent = unifiedApplyData.email;
     if (inputEl) inputEl.value = '';
-    if (revealedEl) {
-      revealedEl.textContent = '';
-      revealedEl.style.display = 'none';
-    }
-    if (btnReveal) {
-      btnReveal.onclick = () => {
-        if (revealedEl) {
-          revealedEl.textContent = code;
-          revealedEl.style.display = 'block';
-        }
-        if (inputEl) {
-          inputEl.value = code;
-          inputEl.focus();
-        }
-        showToast('Verification code auto-filled! Click "Verify OTP & Submit Application" to finish.', 'success');
-      };
-    }
 
     // Switch to Step 3
     document.getElementById('applyStep2Container').style.display = 'none';
@@ -1419,7 +1400,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (res && res.sent) {
         showToast(`Verification code delivered to ${unifiedApplyData.email}! Check inbox or Spam.`, 'success');
       } else {
-        showToast(`Verification code dispatched. Check inbox or use instant auto-fill below.`, 'normal');
+        showToast(`Verification code dispatched to ${unifiedApplyData.email}. Check inbox or Spam.`, 'normal');
       }
     });
   });
@@ -1436,33 +1417,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!unifiedApplyData || !unifiedApplyData.email) return;
     const code = authService.generateOTP(unifiedApplyData.email);
     const fullName = `${unifiedApplyData.firstName} ${unifiedApplyData.lastName}`.trim() || 'Applicant';
-    const revealedEl = document.getElementById('revealedApplyOtp');
-    const btnReveal = document.getElementById('btnRevealApplyOtp');
     const inputEl = document.getElementById('applyOtpInput');
-
-    if (revealedEl) {
-      revealedEl.textContent = '';
-      revealedEl.style.display = 'none';
-    }
-    if (btnReveal) {
-      btnReveal.onclick = () => {
-        if (revealedEl) {
-          revealedEl.textContent = code;
-          revealedEl.style.display = 'block';
-        }
-        if (inputEl) {
-          inputEl.value = code;
-          inputEl.focus();
-        }
-        showToast('Verification code auto-filled! Click "Verify OTP & Submit Application" to finish.', 'success');
-      };
-    }
+    if (inputEl) inputEl.value = '';
 
     authService.sendOTPEmail(unifiedApplyData.email, code, fullName).then((res) => {
       if (res && res.sent) {
         showToast(`New verification code delivered to ${unifiedApplyData.email}! Check inbox or spam.`, 'success');
       } else {
-        showToast(`New code generated. Check inbox or use instant auto-fill below.`, 'normal');
+        showToast(`New code generated and sent to ${unifiedApplyData.email}. Check inbox or Spam.`, 'normal');
       }
     });
   });
