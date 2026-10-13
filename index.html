@@ -2282,7 +2282,9 @@
         <div class="sidebar-bottom">
           <!-- Role Switcher -->
           <button class="btn btn-outline btn-sm"
-            onclick="navigateToPortal('member')">
+            id="presenterToMemberBtn"
+            type="button"
+            onclick="window.navigateToPortal ? window.navigateToPortal('member') : (typeof navigateToPortal === 'function' ? navigateToPortal('member') : null)">
             <span class="sidebar-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>

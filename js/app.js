@@ -577,6 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <a href="#" class="mobile-nav-link" data-presenter-nav="profile">${icons.user || ''} ${isAr ? 'ملف المتحدث' : 'Presenter Profile'}</a>
         <a href="#" class="mobile-nav-link cert-drawer-disabled" data-presenter-nav="certificate">${icons.fileText || ''} ${isAr ? 'شهادة المتحدث' : 'Keynote Certificate'} <span class="cert-soon-badge" style="margin-inline-start: auto;">Soon</span></a>
         <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-light);">
+        <a href="#" class="mobile-nav-link" data-nav-action="member">${icons.users || ''} ${isAr ? 'المشاركة كعضو' : 'Participate as Member'}</a>
         <a href="#" class="mobile-nav-link" data-nav-action="public">${icons.globe || ''} ${isAr ? 'الموقع العام' : 'Public Site Landing'}</a>
       `;
     } else if (activePortal === 'member' && user) {
@@ -638,6 +639,14 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
         if (typeof switchMemberSubview === 'function') switchMemberSubview(target);
+      });
+    });
+
+    nav.querySelectorAll('[data-nav-action="member"]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeMobileDrawer();
+        navigateToPortal('member');
       });
     });
 
@@ -754,6 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateAuthHeaderUI();
   }
+  window.navigateToPortal = navigateToPortal;
 
   // Logo click returns to appropriate view
   document.getElementById('brandLogo')?.addEventListener('click', (e) => {
@@ -3421,6 +3431,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashNewTopicBtn = document.getElementById('presDashNewTopicBtn');
     if (dashNewTopicBtn) {
       dashNewTopicBtn.onclick = () => switchPresenterSubview('present');
+    }
+
+    const presToMemberBtn = document.getElementById('presenterToMemberBtn');
+    if (presToMemberBtn) {
+      presToMemberBtn.onclick = (e) => {
+        e.preventDefault();
+        navigateToPortal('member');
+      };
     }
 
     const presLogout = document.getElementById('presenterLogoutBtn');
