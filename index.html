@@ -1266,7 +1266,7 @@
             </button>
           </li>
           <li>
-            <button class="sidebar-item-btn" data-member-target="certificate">
+            <button class="sidebar-item-btn cert-nav-disabled" data-member-target="certificate" title="Participation Certificate (Temporarily Disabled)">
               <span class="sidebar-item-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
                   viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                   stroke-linejoin="round">
@@ -1276,6 +1276,7 @@
                   <line x1="16" y1="17" x2="8" y2="17"></line>
                 </svg></span>
               <span data-i18n="navCertificate">Participation Certificate</span>
+              <span class="cert-soon-badge">Soon</span>
             </button>
           </li>
           <li style="margin-top: 0.35rem; margin-bottom: 0.2rem; padding: 0 0.25rem;">
@@ -1463,7 +1464,8 @@
                       </svg></span>
                     <span class="qa-title">My Journey & Badges</span>
                   </div>
-                  <div class="qa-card" data-member-nav="certificate">
+                  <div class="qa-card cert-qa-disabled" data-member-nav="certificate" title="Participation Certificate (Temporarily Disabled)">
+                    <span class="cert-soon-badge-sm">Soon</span>
                     <span class="qa-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
                         stroke-linejoin="round">
@@ -1959,67 +1961,87 @@
               <p>Recognizing verified contributions to the Qatar ISDC7 Alumni International Youth Dialogue.</p>
             </div>
             <div class="portal-actions">
-              <button class="btn btn-navy" id="printCertBtn" style="gap: 0.5rem;">
+              <button class="btn btn-navy" id="printCertBtn" disabled style="gap: 0.5rem; opacity: 0.5; cursor: not-allowed; pointer-events: none;" title="Printing Temporarily Disabled">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <polyline points="6 9 6 2 18 2 18 9"></polyline>
                   <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                   <rect x="6" y="14" width="12" height="8"></rect>
-                </svg> Print / Save as PDF
+                </svg> Print / Save as PDF (Disabled)
               </button>
             </div>
           </div>
 
-          <!-- Printable Certificate Frame -->
-          <div class="certificate-preview-box print-only-target" id="certificateCardContent">
-            <!-- Ornate Corner Accents -->
-            <div class="cert-corner cert-tl"></div>
-            <div class="cert-corner cert-tr"></div>
-            <div class="cert-corner cert-bl"></div>
-            <div class="cert-corner cert-br"></div>
+          <!-- Printable Certificate Frame Container with Disabled Overlay -->
+          <div class="certificate-container-wrapper">
+            <div class="certificate-preview-box print-only-target certificate-blurred" id="certificateCardContent">
+              <!-- Ornate Corner Accents -->
+              <div class="cert-corner cert-tl"></div>
+              <div class="cert-corner cert-tr"></div>
+              <div class="cert-corner cert-bl"></div>
+              <div class="cert-corner cert-br"></div>
 
-            <div class="cert-header-seal">GYDE</div>
-            <div class="cert-main-title">Global Youth Dialogue & Exchange</div>
-            <div
-              style="font-family: 'Cairo', sans-serif; font-size: 1rem; color: #4851BA; font-weight: 700; margin-bottom: 0.25rem;">
-              الحوار والتبادل الشبابي الدولي (GYDE)
-            </div>
-            <div class="cert-sub-title">Certificate of International Youth Dialogue Participation</div>
-
-            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">This official testimonial is proudly
-              presented to:</p>
-            <div class="cert-recipient" id="certRecipientName">Mubashir CP</div>
-            <div style="font-size: 1rem; font-weight: 600; color: #4851BA; margin-bottom: 1.5rem;" id="certCountryRole">
-              Qatar • Executive Director & Administrator
-            </div>
-
-            <p class="cert-body-p">
-              For distinguished participation and analytical contribution to cross-border deliberations convened by the
-              alumni network of the <strong>7th Qatar International Schools Debate Championship (ISDC7)</strong>.
-              The recipient has actively defended evidence-based motions and engaged in international policy exchange.
-            </p>
-
-            <div
-              style="max-width: 600px; margin: 0 auto; text-align: left; background: #F4F8F6; padding: 0.85rem 1.25rem; border-radius: 6px; font-size: 0.8rem; border: 1px solid #D8EAE3;">
-              <strong>Citations of Deliberated Motions:</strong>
-              <ul style="margin: 0.35rem 0 0 1.25rem;">
-                <li>Mandating AI Literacy and Ethical AI Utilization in Secondary School Curricula</li>
-                <li>Historic Carbon Emitters Liability and Climate Infrastructure Grants in the Global South</li>
-              </ul>
-            </div>
-
-            <div class="cert-signatures-row">
-              <div class="cert-sig-item">
-                <div class="cert-sig-name">Mubashir CP</div>
-                <div class="cert-sig-title">Executive Administrator & Coordinator<br>GYDE International Secretariat</div>
+              <div class="cert-header-seal">GYDE</div>
+              <div class="cert-main-title">Global Youth Dialogue & Exchange</div>
+              <div
+                style="font-family: 'Cairo', sans-serif; font-size: 1rem; color: #4851BA; font-weight: 700; margin-bottom: 0.25rem;">
+                الحوار والتبادل الشبابي الدولي (GYDE)
               </div>
-              <div class="cert-sig-item">
-                <div class="cert-sig-name" id="certVerificationId">GYD-ADMIN-2024</div>
-                <div class="cert-sig-title">Verified Electronic Registry ID<br>Issued in Doha, Qatar</div>
+              <div class="cert-sub-title">Certificate of International Youth Dialogue Participation</div>
+
+              <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem;">This official testimonial is proudly
+                presented to:</p>
+              <div class="cert-recipient" id="certRecipientName">Mubashir CP</div>
+              <div style="font-size: 1rem; font-weight: 600; color: #4851BA; margin-bottom: 1.5rem;" id="certCountryRole">
+                Qatar • Executive Director & Administrator
               </div>
-              <div class="cert-sig-item">
-                <div class="cert-sig-name">GYDE Secretariat</div>
-                <div class="cert-sig-title">Executive Directorate<br>Global Youth Dialogue</div>
+
+              <p class="cert-body-p">
+                For distinguished participation and analytical contribution to cross-border deliberations convened by the
+                alumni network of the <strong>7th Qatar International Schools Debate Championship (ISDC7)</strong>.
+                The recipient has actively defended evidence-based motions and engaged in international policy exchange.
+              </p>
+
+              <div
+                style="max-width: 600px; margin: 0 auto; text-align: left; background: #F4F8F6; padding: 0.85rem 1.25rem; border-radius: 6px; font-size: 0.8rem; border: 1px solid #D8EAE3;">
+                <strong>Citations of Deliberated Motions:</strong>
+                <ul style="margin: 0.35rem 0 0 1.25rem;">
+                  <li>Mandating AI Literacy and Ethical AI Utilization in Secondary School Curricula</li>
+                  <li>Historic Carbon Emitters Liability and Climate Infrastructure Grants in the Global South</li>
+                </ul>
+              </div>
+
+              <div class="cert-signatures-row">
+                <div class="cert-sig-item">
+                  <div class="cert-sig-name">Mubashir CP</div>
+                  <div class="cert-sig-title">Executive Administrator & Coordinator<br>GYDE International Secretariat</div>
+                </div>
+                <div class="cert-sig-item">
+                  <div class="cert-sig-name" id="certVerificationId">GYD-ADMIN-2024</div>
+                  <div class="cert-sig-title">Verified Electronic Registry ID<br>Issued in Doha, Qatar</div>
+                </div>
+                <div class="cert-sig-item">
+                  <div class="cert-sig-name">GYDE Secretariat</div>
+                  <div class="cert-sig-title">Executive Directorate<br>Global Youth Dialogue</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sleek Frosted Disabled Overlay -->
+            <div class="certificate-disabled-overlay">
+              <div class="certificate-disabled-card">
+                <div class="cert-disabled-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <h3>Certificates Temporarily Disabled</h3>
+                <p>Official participation certificates are currently locked for administrative registry validation. This feature will be re-enabled soon.</p>
+                <div class="cert-disabled-badge">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                  <span>Temporarily Disabled • Coming Soon</span>
+                </div>
               </div>
             </div>
           </div>
@@ -2107,7 +2129,7 @@
           </svg></span>
         <span data-i18n="navJourney">Badges</span>
       </button>
-      <button class="mobile-tab-btn" data-member-target="certificate">
+      <button class="mobile-tab-btn cert-nav-disabled" data-member-target="certificate" title="Participation Certificate (Temporarily Disabled)">
         <span class="mobile-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
             fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -2115,7 +2137,7 @@
             <line x1="16" y1="13" x2="8" y2="13"></line>
             <line x1="16" y1="17" x2="8" y2="17"></line>
           </svg></span>
-        <span data-i18n="navCertificate">Certificate</span>
+        <span data-i18n="navCertificate">Certificate (Soon)</span>
       </button>
       <button class="mobile-tab-btn" data-member-target="profile">
         <span class="mobile-tab-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -2238,6 +2260,21 @@
                 </svg>
               </span>
               <span data-i18n="speakerProfile">Speaker Profile</span>
+            </button>
+          </li>
+          <li>
+            <button class="sidebar-item-btn cert-nav-disabled" data-presenter-target="certificate" title="Keynote Certificate (Temporarily Disabled)">
+              <span class="sidebar-item-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                </svg>
+              </span>
+              <span>Keynote Certificate</span>
+              <span class="cert-soon-badge">Soon</span>
             </button>
           </li>
         </ul>
@@ -2420,6 +2457,20 @@
                 <button class="btn btn-outline btn-sm" style="width: 100%;"
                   onclick="window.switchPresenterSubview('topic-bank')">
                   Open Topic Bank Catalog
+                </button>
+              </div>
+
+              <!-- Keynote Certificate Card (Disabled) -->
+              <div class="card-panel" style="margin-top: 1.5rem; opacity: 0.7; position: relative;">
+                <div class="panel-header">
+                  <h4>Keynote Certificate</h4>
+                  <span class="cert-soon-badge">Soon</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
+                  Official keynote presentation certificates will be available after registry verification.
+                </p>
+                <button class="btn btn-outline btn-sm cert-nav-disabled" style="width: 100%; cursor: not-allowed;" onclick="showToast('Keynote & Presentation Certificates are temporarily disabled and will be enabled soon.', 'warning'); return false;">
+                  Download Keynote Certificate (Disabled)
                 </button>
               </div>
             </div>

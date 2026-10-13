@@ -1878,30 +1878,48 @@ class DataService {
             const cleanRAppEmail = (rApp.email || '').toLowerCase().trim();
             if (!cleanRAppEmail) return;
 
-            // Handle deleted status from remote cloud database
-            if (rApp.status === 'Deleted' || deletedEmails.includes(cleanRAppEmail)) {
-              if (!deletedEmails.includes(cleanRAppEmail) && cleanRAppEmail !== '3681mubashircp@gmail.com') {
-                deletedEmails.push(cleanRAppEmail);
+            // If user re-applied or was approved, clear them out of deleted tombstones!
+            const isReAppOrApproved = (rApp.status === 'Pending' || rApp.status === 'Approved' || rApp.status === 'Approved - Awaiting Registration' || rApp.status === 'Registered');
+            if (isReAppOrApproved) {
+              if (deletedEmails.includes(cleanRAppEmail)) {
+                deletedEmails = deletedEmails.filter(e => e !== cleanRAppEmail);
                 this.db.deletedUserEmails = deletedEmails;
                 try {
                   localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(deletedEmails));
                 } catch (e) {}
               }
-              // Purge user and application locally
-              this.db.users = this.db.users.filter(u => !u.email || u.email.toLowerCase().trim() !== cleanRAppEmail);
-              this.db.applications = this.db.applications.filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
-              if (Array.isArray(this.db.presenterApplications)) {
-                this.db.presenterApplications = this.db.presenterApplications.filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
-              }
-              try {
-                if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
-                  const cur = window.GYD_AUTH.getCurrentUser();
-                  if (cur && cur.email && cur.email.toLowerCase().trim() === cleanRAppEmail) {
-                    window.GYD_AUTH.logout();
-                  }
+            }
+
+            // Only purge if remote record is explicitly 'Deleted' AND there is no pending or approved application for this email
+            if (rApp.status === 'Deleted') {
+              const hasActiveReApp = remoteApps.some(other => 
+                other.email && other.email.toLowerCase().trim() === cleanRAppEmail && 
+                (other.status === 'Pending' || other.status === 'Approved' || other.status === 'Registered')
+              );
+              if (!hasActiveReApp) {
+                if (!deletedEmails.includes(cleanRAppEmail) && cleanRAppEmail !== '3681mubashircp@gmail.com') {
+                  deletedEmails.push(cleanRAppEmail);
+                  this.db.deletedUserEmails = deletedEmails;
+                  try {
+                    localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(deletedEmails));
+                  } catch (e) {}
                 }
-              } catch (e) {}
-              return;
+                // Purge user and application locally
+                this.db.users = (this.db.users || []).filter(u => !u.email || u.email.toLowerCase().trim() !== cleanRAppEmail);
+                this.db.applications = (this.db.applications || []).filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
+                if (Array.isArray(this.db.presenterApplications)) {
+                  this.db.presenterApplications = this.db.presenterApplications.filter(a => !a.email || a.email.toLowerCase().trim() !== cleanRAppEmail);
+                }
+                try {
+                  if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
+                    const cur = window.GYD_AUTH.getCurrentUser();
+                    if (cur && cur.email && cur.email.toLowerCase().trim() === cleanRAppEmail) {
+                      window.GYD_AUTH.logout();
+                    }
+                  }
+                } catch (e) {}
+                return;
+              }
             }
 
             if (legacyDemoEmails.includes(cleanRAppEmail)) {
@@ -2267,17 +2285,32 @@ class DataService {
     writing.status = 'Published';
     writing.publicationDate = new Date().toISOString().split('T')[0];
 
-    // Add notification for community
+    // Add notifications
     if (this.db.notifications) {
+      if (writing.authorEmail) {
+        this.db.notifications.unshift({
+          id: 'notif_' + Date.now().toString(36) + '_auth',
+          title: 'Academic Paper Approved & Published',
+          message: `Congratulations! Your paper "${writing.title}" has been reviewed, approved, and published live in the Academic Library.`,
+          type: 'writing',
+          read: false,
+          time: 'Just now',
+          targetView: 'writings',
+          targetId: writing.id,
+          recipientEmail: (writing.authorEmail || '').toLowerCase().trim(),
+          recipientUserId: writing.authorId
+        });
+      }
       this.db.notifications.unshift({
-        id: 'notif_' + Date.now().toString(36),
+        id: 'notif_' + Date.now().toString(36) + '_pub',
         title: 'New Academic Paper Published',
         message: `"${writing.title}" by ${writing.author} (${writing.categoryName}) is now live in the Academic Library.`,
         type: 'topic',
         read: false,
         time: 'Just now',
         targetView: 'writings',
-        targetId: writing.id
+        targetId: writing.id,
+        audience: 'all'
       });
     }
 
@@ -2334,6 +2367,21 @@ class DataService {
     } else {
       this.db.applications.unshift(newApp);
     }
+
+    if (this.db.notifications) {
+      this.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_app',
+        title: 'New Member Application',
+        message: `${newApp.name} (${newApp.country}) has submitted an application for GYD Membership.`,
+        type: 'system',
+        read: false,
+        time: 'Just now',
+        targetView: 'applications',
+        targetId: newApp.id,
+        recipientRole: 'Coordinator'
+      });
+    }
+
     this.saveDatabase();
 
     // Send to centralized serverless API so coordinator receives it across all devices
@@ -2411,6 +2459,35 @@ class DataService {
       this.db.users[userIndex] = { ...this.db.users[userIndex], ...activeUser, id: this.db.users[userIndex].id || activeUser.id };
     } else {
       this.db.users.unshift(activeUser);
+    }
+
+    if (this.db.notifications) {
+      // 1. Action confirmation for Coordinator
+      this.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_coord',
+        title: 'Member Application Approved',
+        message: `You approved ${app.name} as an official community member.`,
+        type: 'system',
+        read: false,
+        time: 'Just now',
+        targetView: 'roster',
+        targetId: null,
+        recipientRole: 'Coordinator'
+      });
+
+      // 2. Notification for Member
+      this.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_mem',
+        title: 'Welcome to Global Youth Dialogue!',
+        message: `Congratulations ${app.name}! Your membership application has been approved. You are now an official verified member.`,
+        type: 'system',
+        read: false,
+        time: 'Just now',
+        targetView: 'member',
+        targetId: null,
+        recipientEmail: cleanEmail,
+        recipientUserId: activeUser.id
+      });
     }
 
     this.syncCommunityUsers();
@@ -2552,17 +2629,32 @@ class DataService {
       this.db.presenterApplications.unshift(newApp);
     }
 
-    // Also add a notification for coordinators
+    // Add notifications for coordinator and applicant
     if (this.db.notifications) {
+      // 1. Coordinator notification
       this.db.notifications.unshift({
-        id: 'notif_' + Date.now().toString(36),
+        id: 'notif_' + Date.now().toString(36) + '_coord',
         title: 'New Presenter Application',
         message: `${newApp.name} (${newApp.country}) has applied for Official Presenter accreditation: "${newApp.proposedTopic}".`,
         type: 'topic',
         read: false,
         time: 'Just now',
         targetView: 'applications',
-        targetId: newApp.id
+        targetId: newApp.id,
+        recipientRole: 'Coordinator'
+      });
+      // 2. Member notification
+      this.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_mem',
+        title: 'Presenter Request Under Review',
+        message: `Your request for Official Presenter accreditation ("${newApp.proposedTopic}") has been submitted and is under coordinator review.`,
+        type: 'topic',
+        read: false,
+        time: 'Just now',
+        targetView: 'present',
+        targetId: newApp.id,
+        recipientEmail: cleanEmail,
+        recipientUserId: newApp.userId
       });
     }
 
@@ -2623,17 +2715,33 @@ class DataService {
       }
     }
 
-    // Add celebration notification
+    // Add notifications for Coordinator and Applicant Member
     if (this.db.notifications) {
+      // 1. Action confirmation for Coordinator
       this.db.notifications.unshift({
-        id: 'notif_' + Date.now().toString(36),
+        id: 'notif_' + Date.now().toString(36) + '_coord',
+        title: 'Presenter Request Approved',
+        message: `You approved ${app.name}'s request for Official Presenter accreditation.`,
+        type: 'system',
+        read: false,
+        time: 'Just now',
+        targetView: 'roster',
+        targetId: null,
+        recipientRole: 'Coordinator'
+      });
+
+      // 2. Celebration & portal access for Applicant Member
+      this.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_pres',
         title: 'Presenter Accreditation Approved',
-        message: `Congratulations ${app.name}! You are now an official accredited GYD Presenter with full access to the Presenter Portal.`,
+        message: `Congratulations ${app.name}! Your request for Presenter accreditation has been approved. You now have full access to the Presenter Portal.`,
         type: 'topic',
         read: false,
         time: 'Just now',
         targetView: 'present',
-        targetId: null
+        targetId: null,
+        recipientEmail: cleanEmail,
+        recipientUserId: app.userId || (user ? user.id : null)
       });
     }
 
@@ -2725,13 +2833,119 @@ class DataService {
   // PHASE 2 METHODS: Notifications, Country Chapters, Media & PR, Search, Analytics
   // =========================================================================
 
-  // Notifications
+  // Current session & role helpers for notification routing
+  getCurrentAuthUser() {
+    try {
+      if (window.GYD_AUTH && typeof window.GYD_AUTH.getCurrentUser === 'function') {
+        return window.GYD_AUTH.getCurrentUser();
+      }
+      const raw = localStorage.getItem('gyd_active_session');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  isCurrentUserCoordinator() {
+    try {
+      if (window.GYD_AUTH && typeof window.GYD_AUTH.isCoordinator === 'function') {
+        return window.GYD_AUTH.isCoordinator();
+      }
+      const u = this.getCurrentAuthUser();
+      if (!u) return false;
+      return u.role === 'Coordinator' || u.role === 'Admin' ||
+             (u.email && u.email.toLowerCase().trim() === '3681mubashircp@gmail.com') ||
+             u.id === 'usr_admin_mubashir';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  // Notifications - Role & recipient-isolated
   getNotifications() {
-    return this.db.notifications || [];
+    const all = this.db.notifications || [];
+    const user = this.getCurrentAuthUser();
+    const isCoord = this.isCurrentUserCoordinator();
+
+    return all.filter(n => {
+      // 1. Detect if notification is strictly intended for Coordinator/Admin
+      const isCoordOnly = (
+        n.recipientRole === 'Coordinator' ||
+        n.recipientRole === 'Admin' ||
+        n.title === 'New Presenter Application' ||
+        n.title === 'New Member Application' ||
+        n.title === 'New Academic Paper Pending Review' ||
+        n.title === 'Presenter Request Approved' ||
+        n.title === 'Member Application Approved' ||
+        (typeof n.message === 'string' && (
+          n.message.includes('for coordinator review') ||
+          n.message.includes('has applied for Official Presenter') ||
+          n.message.includes('has submitted an application for GYD') ||
+          n.message.startsWith('You have approved') ||
+          n.message.startsWith('You approved')
+        ))
+      );
+
+      // 2. Detect if notification is personal to an applicant/member
+      const isMemberPersonal = (
+        Boolean(n.recipientEmail) ||
+        Boolean(n.recipientUserId) ||
+        n.title === 'Presenter Accreditation Approved' ||
+        n.title === 'Welcome to Global Youth Dialogue!' ||
+        n.title === 'Presenter Request Under Review' ||
+        n.title === 'Academic Paper Under Review' ||
+        n.title === 'Academic Paper Approved & Published' ||
+        (typeof n.message === 'string' && (
+          n.message.startsWith('Congratulations') ||
+          n.message.includes('You are now an official') ||
+          n.message.includes('Your request for Presenter accreditation') ||
+          n.message.includes('Your membership application has been approved') ||
+          n.message.includes('Your paper "')
+        ))
+      );
+
+      // Coordinator dashboard view
+      if (isCoord) {
+        if (isCoordOnly) return true;
+        if (user && user.email && n.recipientEmail && n.recipientEmail.toLowerCase().trim() === user.email.toLowerCase().trim()) {
+          return true;
+        }
+        if (isMemberPersonal) return false; // Never show member celebration/approval notifications to admin!
+        return true; // General broadcasts (new publications, announcements)
+      }
+
+      // Member / Presenter dashboard view (non-coordinator)
+      if (user && user.email) {
+        if (isCoordOnly) return false; // Never show admin action logs or approval queues to members!
+
+        if (isMemberPersonal) {
+          const userEmail = (user.email || '').toLowerCase().trim();
+          const userId = user.id;
+
+          if (n.recipientEmail) {
+            return n.recipientEmail.toLowerCase().trim() === userEmail;
+          }
+          if (n.recipientUserId && userId) {
+            return n.recipientUserId === userId;
+          }
+          // Legacy notifications with no recipientEmail: match name if available
+          if (user.name && typeof n.message === 'string' && n.message.toLowerCase().includes(user.name.toLowerCase())) {
+            return true;
+          }
+          return false;
+        }
+
+        return true; // Broadcasts
+      }
+
+      // Public / Guest
+      if (isCoordOnly || isMemberPersonal) return false;
+      return n.audience === 'all' || (!n.recipientRole && !n.recipientEmail);
+    });
   }
 
   getUnreadNotificationsCount() {
-    return (this.db.notifications || []).filter(n => !n.read).length;
+    return this.getNotifications().filter(n => !n.read).length;
   }
 
   markNotificationRead(notifId) {
@@ -2745,7 +2959,8 @@ class DataService {
   }
 
   markAllNotificationsRead() {
-    (this.db.notifications || []).forEach(n => { n.read = true; });
+    const list = this.getNotifications();
+    list.forEach(n => { n.read = true; });
     this.saveDatabase();
     return true;
   }
@@ -2753,14 +2968,18 @@ class DataService {
   addNotification(notifData) {
     if (!this.db.notifications) this.db.notifications = [];
     const newNotif = {
-      id: 'notif_' + Date.now().toString(36),
+      id: notifData.id || ('notif_' + Date.now().toString(36)),
       title: notifData.title,
       message: notifData.message,
       type: notifData.type || 'system',
-      time: 'Just now',
+      time: notifData.time || 'Just now',
       read: false,
       targetView: notifData.targetView || null,
-      targetId: notifData.targetId || null
+      targetId: notifData.targetId || null,
+      recipientRole: notifData.recipientRole || null,
+      recipientEmail: notifData.recipientEmail ? notifData.recipientEmail.toLowerCase().trim() : null,
+      recipientUserId: notifData.recipientUserId || null,
+      audience: notifData.audience || null
     };
     this.db.notifications.unshift(newNotif);
     this.saveDatabase();

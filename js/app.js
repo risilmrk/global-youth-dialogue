@@ -575,6 +575,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <a href="#" class="mobile-nav-link" data-presenter-nav="sessions">${icons.calendar || ''} ${isAr ? 'جلسات التحدث' : 'Speaking Sessions'}</a>
         <a href="#" class="mobile-nav-link" data-presenter-nav="writings">${icons.scroll || ''} ${isAr ? 'أوراق البحث' : 'Research Briefings'}</a>
         <a href="#" class="mobile-nav-link" data-presenter-nav="profile">${icons.user || ''} ${isAr ? 'ملف المتحدث' : 'Presenter Profile'}</a>
+        <a href="#" class="mobile-nav-link cert-drawer-disabled" data-presenter-nav="certificate">${icons.fileText || ''} ${isAr ? 'شهادة المتحدث' : 'Keynote Certificate'} <span class="cert-soon-badge" style="margin-inline-start: auto;">Soon</span></a>
         <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-light);">
         <a href="#" class="mobile-nav-link" data-nav-action="public">${icons.globe || ''} ${isAr ? 'الموقع العام' : 'Public Site Landing'}</a>
       `;
@@ -588,7 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <a href="#" class="mobile-nav-link" data-member-nav="writings">${icons.scroll || ''} ${isAr ? 'أوراقي الأكاديمية' : 'My Academic Papers'}</a>
         <a href="#" class="mobile-nav-link" data-member-nav="feedback">${icons.messageSquare || ''} ${isAr ? 'تقييمات الغرفة' : 'Chamber Peer Review'}</a>
         <a href="#" class="mobile-nav-link" data-member-nav="journey">${icons.award || ''} ${isAr ? 'شارات التميز' : 'Debate Journey & Badges'}</a>
-        <a href="#" class="mobile-nav-link" data-member-nav="certificate">${icons.fileText || ''} ${isAr ? 'الشهادة الرسمية' : 'Official Certificate'}</a>
+        <a href="#" class="mobile-nav-link cert-drawer-disabled" data-member-nav="certificate">${icons.fileText || ''} ${isAr ? 'الشهادة الرسمية' : 'Official Certificate'} <span class="cert-soon-badge" style="margin-inline-start: auto;">Soon</span></a>
         <a href="#" class="mobile-nav-link" data-member-nav="profile">${icons.user || ''} ${isAr ? 'الملف الشخصي' : 'Profile Settings'}</a>
         <hr style="margin: 0.5rem 0; border: none; border-top: 1px solid var(--border-light);">
         <a href="#" class="mobile-nav-link" data-nav-action="public">${icons.globe || ''} ${isAr ? 'الموقع العام' : 'Public Site Landing'}</a>
@@ -619,6 +620,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const target = link.getAttribute('data-presenter-nav');
         closeMobileDrawer();
+        if (target === 'certificate') {
+          showToast('Keynote & Presentation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (typeof switchPresenterSubview === 'function') switchPresenterSubview(target);
       });
     });
@@ -628,6 +633,10 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         const target = link.getAttribute('data-member-nav');
         closeMobileDrawer();
+        if (target === 'certificate') {
+          showToast('Official Participation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (typeof switchMemberSubview === 'function') switchMemberSubview(target);
       });
     });
@@ -801,7 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     })();
 
-    if (!result.success && !isEmailDeleted && !result.message.includes('removed')) {
+    if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -821,6 +830,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
+            // Un-tombstone if previously deleted
+            if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+              window.GYD_DATA.db.deletedUserEmails = window.GYD_DATA.db.deletedUserEmails.filter(e => e !== cleanInput);
+            }
+            try {
+              let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+              if (Array.isArray(localDeleted)) {
+                localDeleted = localDeleted.filter(e => e !== cleanInput);
+                localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+              }
+            } catch (e) {}
+
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
@@ -855,6 +876,8 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             }
             result = authService.loginWithRole(email, password, selectedPortal);
+          } else if (match && match.status === 'Pending') {
+            result = { success: false, message: 'Your application is currently pending coordinator review. You can sign in once approved.' };
           }
         }
       } catch (err) {}
@@ -1064,7 +1087,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return false;
     })();
 
-    if (!result.success && !isEmailDeleted && !result.message.includes('removed')) {
+    if (!result.success) {
       try {
         const apiUrl = (window.GYD_DATA && typeof window.GYD_DATA.getApplicationsApiUrl === 'function')
           ? window.GYD_DATA.getApplicationsApiUrl()
@@ -1084,6 +1107,18 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           if (match && match.status !== 'Deleted' && (match.status === 'Approved' || match.status === 'Approved - Awaiting Registration' || match.status === 'Registered')) {
+            // Un-tombstone if previously deleted
+            if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+              window.GYD_DATA.db.deletedUserEmails = window.GYD_DATA.db.deletedUserEmails.filter(e => e !== cleanInput);
+            }
+            try {
+              let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+              if (Array.isArray(localDeleted)) {
+                localDeleted = localDeleted.filter(e => e !== cleanInput);
+                localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+              }
+            } catch (e) {}
+
             if (window.GYD_DATA && window.GYD_DATA.db) {
               if (!Array.isArray(window.GYD_DATA.db.applications)) window.GYD_DATA.db.applications = [];
               const idx = window.GYD_DATA.db.applications.findIndex(a => a.email && a.email.toLowerCase().trim() === cleanInput);
@@ -1118,6 +1153,8 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             }
             result = authService.loginWithRole(email, password, selectedPortal);
+          } else if (match && match.status === 'Pending') {
+            result = { success: false, message: 'Your application is currently pending coordinator review. You can sign in once approved.' };
           }
         }
       } catch (err) {}
@@ -2314,6 +2351,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#viewMember .sidebar-item-btn').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-member-target');
+        if (target === 'certificate') {
+          showToast('Official Participation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (target) switchMemberSubview(target);
       };
     });
@@ -2322,6 +2363,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#memberMobileTabBar .mobile-tab-btn, #viewMember .mobile-tab-btn').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-member-target');
+        if (target === 'certificate') {
+          showToast('Official Participation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (target) switchMemberSubview(target);
       };
     });
@@ -2330,6 +2375,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-member-nav]').forEach(el => {
       el.onclick = () => {
         const target = el.getAttribute('data-member-nav');
+        if (target === 'certificate') {
+          showToast('Official Participation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (target) switchMemberSubview(target);
       };
     });
@@ -3348,6 +3397,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#viewPresenter .sidebar-item-btn').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-presenter-target');
+        if (target === 'certificate') {
+          showToast('Keynote & Presentation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (target) switchPresenterSubview(target);
       };
     });
@@ -3356,6 +3409,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#presenterMobileTabBar .mobile-tab-btn, #viewPresenter .mobile-tab-btn').forEach(btn => {
       btn.onclick = () => {
         const target = btn.getAttribute('data-presenter-target');
+        if (target === 'certificate') {
+          showToast('Keynote & Presentation Certificates are temporarily disabled and will be enabled soon.', 'warning');
+          return;
+        }
         if (target) switchPresenterSubview(target);
       };
     });
@@ -4505,17 +4562,30 @@ document.addEventListener('DOMContentLoaded', () => {
       sources
     });
 
-    // Also dispatch notification to Coordinator
+    // Also dispatch notification to Coordinator and Author
     if (dataService.db && dataService.db.notifications) {
       dataService.db.notifications.unshift({
-        id: 'notif_' + Date.now().toString(36),
+        id: 'notif_' + Date.now().toString(36) + '_coord',
         title: 'New Academic Paper Pending Review',
         message: `${authorName} submitted "${title}" for coordinator review and approval.`,
         type: 'topic',
         read: false,
         time: 'Just now',
         targetView: 'writings',
-        targetId: newWriting.id
+        targetId: newWriting.id,
+        recipientRole: 'Coordinator'
+      });
+      dataService.db.notifications.unshift({
+        id: 'notif_' + Date.now().toString(36) + '_auth',
+        title: 'Academic Paper Under Review',
+        message: `Your paper "${title}" has been submitted for editorial review by the Secretariat.`,
+        type: 'writing',
+        read: false,
+        time: 'Just now',
+        targetView: 'writings',
+        targetId: newWriting.id,
+        recipientEmail: user.email ? user.email.toLowerCase().trim() : '',
+        recipientUserId: user.id
       });
       dataService.saveDatabase();
     }
@@ -6902,6 +6972,17 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('All notifications marked as read', 'success');
     });
 
+    window.updateNotificationBadge = updateBadge;
+    if (window.GYD_AUTH && typeof window.GYD_AUTH.subscribe === 'function') {
+      window.GYD_AUTH.subscribe(() => {
+        updateBadge();
+        const modal = document.getElementById('notificationsModal');
+        if (modal && modal.style.display !== 'none') {
+          renderNotificationList();
+        }
+      });
+    }
+
     updateBadge();
   }
 
@@ -7413,8 +7494,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (idEl) idEl.textContent = cert.certificateNumber;
 
     if (printBtn) {
-      printBtn.onclick = () => {
-        window.print();
+      printBtn.onclick = (e) => {
+        if (e) e.preventDefault();
+        showToast('Official Participation Certificates are temporarily disabled and will be enabled soon.', 'warning');
       };
     }
   }

@@ -756,6 +756,12 @@ module.exports = async function handler(req, res) {
         date: body.date || new Date().toISOString().split('T')[0]
       };
 
+      // Clear any 'Deleted' tombstone record for this email so the re-application takes over cleanly
+      globalApplications = globalApplications.filter(a => {
+        const aEmail = (a.email || '').toLowerCase().trim();
+        return !(aEmail === email.toLowerCase().trim() && a.status === 'Deleted');
+      });
+
       // Check if duplicate email exists
       const existingIdx = globalApplications.findIndex(a => a.email && a.email.toLowerCase().trim() === email.toLowerCase());
       if (existingIdx >= 0) {

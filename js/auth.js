@@ -42,6 +42,21 @@ class AuthService {
         if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
           if (window.GYD_DATA.db.deletedUserEmails.includes(cleanEmail)) isDeleted = true;
         }
+
+        // If user has a valid active account and approved application, un-tombstone them
+        if (isDeleted && window.GYD_DATA && window.GYD_DATA.db) {
+          const uList = window.GYD_DATA.db.users || [];
+          const aList = window.GYD_DATA.db.applications || [];
+          const isApproved = uList.some(u => u.email && u.email.toLowerCase().trim() === cleanEmail && u.status !== 'deleted') &&
+                             aList.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && (a.status === 'Approved' || a.status === 'Registered'));
+          if (isApproved) {
+            isDeleted = false;
+            if (Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+              window.GYD_DATA.db.deletedUserEmails = window.GYD_DATA.db.deletedUserEmails.filter(e => e !== cleanEmail);
+            }
+          }
+        }
+
         if (isDeleted) {
           localStorage.removeItem(AUTH_STORAGE_KEY);
           return null;
@@ -153,10 +168,39 @@ class AuthService {
     })();
 
     if (isDeleted) {
-      return {
-        success: false,
-        message: 'This account has been removed by the administrator. Access is revoked.'
-      };
+      let hasApprovedReApp = false;
+      let hasPendingReApp = false;
+      if (window.GYD_DATA && window.GYD_DATA.db) {
+        const uList = window.GYD_DATA.db.users || [];
+        const aList = window.GYD_DATA.db.applications || [];
+        hasApprovedReApp = uList.some(u => u.email && u.email.toLowerCase().trim() === cleanEmail && u.status !== 'deleted') &&
+                           aList.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && (a.status === 'Approved' || a.status === 'Registered'));
+        hasPendingReApp = aList.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && a.status === 'Pending');
+      }
+
+      if (hasApprovedReApp) {
+        // Un-tombstone: Coordinator approved their new application!
+        if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+          window.GYD_DATA.db.deletedUserEmails = window.GYD_DATA.db.deletedUserEmails.filter(e => e !== cleanEmail);
+        }
+        try {
+          let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+          if (Array.isArray(localDeleted)) {
+            localDeleted = localDeleted.filter(e => e !== cleanEmail);
+            localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+          }
+        } catch (e) {}
+      } else if (hasPendingReApp) {
+        return {
+          success: false,
+          message: 'Your membership re-application is currently pending coordinator review. You can sign in once approved.'
+        };
+      } else {
+        return {
+          success: false,
+          message: 'This account was removed by the administrator. You can re-apply for membership to rejoin the community.'
+        };
+      }
     }
 
     // 2. Reject all legacy demo accounts
@@ -379,7 +423,32 @@ class AuthService {
     })();
 
     if (isDeleted) {
-      return { success: false, message: 'This account has been removed by the administrator. Access is revoked.' };
+      let hasApprovedReApp = false;
+      let hasPendingReApp = false;
+      if (window.GYD_DATA && window.GYD_DATA.db) {
+        const uList = window.GYD_DATA.db.users || [];
+        const aList = window.GYD_DATA.db.applications || [];
+        hasApprovedReApp = uList.some(u => u.email && u.email.toLowerCase().trim() === cleanEmail && u.status !== 'deleted') &&
+                           aList.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && (a.status === 'Approved' || a.status === 'Registered'));
+        hasPendingReApp = aList.some(a => a.email && a.email.toLowerCase().trim() === cleanEmail && a.status === 'Pending');
+      }
+
+      if (hasApprovedReApp) {
+        if (window.GYD_DATA && window.GYD_DATA.db && Array.isArray(window.GYD_DATA.db.deletedUserEmails)) {
+          window.GYD_DATA.db.deletedUserEmails = window.GYD_DATA.db.deletedUserEmails.filter(e => e !== cleanEmail);
+        }
+        try {
+          let localDeleted = JSON.parse(localStorage.getItem('gyd_deleted_community_emails') || '[]');
+          if (Array.isArray(localDeleted)) {
+            localDeleted = localDeleted.filter(e => e !== cleanEmail);
+            localStorage.setItem('gyd_deleted_community_emails', JSON.stringify(localDeleted));
+          }
+        } catch (e) {}
+      } else if (hasPendingReApp) {
+        return { success: false, message: 'Your application is currently pending coordinator review.' };
+      } else {
+        return { success: false, message: 'This account was removed by the administrator. You may re-apply for membership to rejoin.' };
+      }
     }
 
     // 2. Reject demo accounts
