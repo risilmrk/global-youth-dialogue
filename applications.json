@@ -1,5 +1,26 @@
 [
   {
+    "id": "app_mv6wev5r",
+    "name": "hello haai",
+    "email": "hello123@gmail.com",
+    "password": "hello@123",
+    "country": "United States",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Education & Knowledge",
+      "Environment & Climate",
+      "Economy & Trade",
+      "Governance & Society"
+    ],
+    "debateExperience": "Everything",
+    "motivation": "Fun",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv6wc6f9",
     "name": "hello haai",
     "email": "hello@gmail.com",
