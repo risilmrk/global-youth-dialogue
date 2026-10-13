@@ -1,5 +1,24 @@
 [
   {
+    "id": "app_mv642j9y",
+    "name": "MUHAMMED M V",
+    "email": "azharmv599@gmail.com",
+    "password": "azharmv3709",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Technology & AI",
+      "Environment & Climate",
+      "Governance & Society"
+    ],
+    "debateExperience": "nothing",
+    "motivation": "for betterment of academic propose.",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv60glsx",
     "name": "rabeeh arkd",
     "email": "rabeehsp3663@gmail.com",
