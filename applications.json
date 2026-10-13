@@ -149,7 +149,9 @@
     "motivation": "Because I’m interested in growing my skills more and more",
     "status": "Approved",
     "emailVerified": true,
-    "date": "2026-10-13"
+    "date": "2026-10-13",
+    "role": "Presenter",
+    "isApprovedPresenter": true
   },
   {
     "id": "app_mv6gpurj",
