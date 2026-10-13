@@ -1,5 +1,23 @@
 [
   {
+    "id": "app_mv64f9dh",
+    "name": "Najid Muhammed Ali",
+    "email": "najidmhdali@gmail.com",
+    "password": "MARAKKILLA",
+    "country": "india",
+    "flag": "INT",
+    "interests": [
+      "Global Affairs",
+      "Education & Knowledge",
+      "Governance & Society"
+    ],
+    "debateExperience": "Have courageand confidence to speak but not well experienced",
+    "motivation": "to get knowledge",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv642j9y",
     "name": "MUHAMMED M V",
     "email": "azharmv599@gmail.com",
