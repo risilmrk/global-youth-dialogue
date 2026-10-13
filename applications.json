@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv60glsx",
+    "name": "rabeeh arkd",
+    "email": "rabeehsp3663@gmail.com",
+    "password": "456456",
+    "country": "India",
+    "flag": "INT",
+    "interests": [
+      "Education & Knowledge"
+    ],
+    "debateExperience": "wfa",
+    "motivation": "wefwer",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv603bwp",
     "name": "Hima works",
     "email": "himaworking@gmail.com",
