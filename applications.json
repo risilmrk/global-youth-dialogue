@@ -1,5 +1,21 @@
 [
   {
+    "id": "app_mv5zsuzp",
+    "name": "Hima works",
+    "email": "himaworking@gmail.com",
+    "password": "258258",
+    "country": "india",
+    "flag": "INT",
+    "interests": [
+      "Education & Knowledge"
+    ],
+    "debateExperience": "wsaergf",
+    "motivation": "ergfvds",
+    "status": "Pending",
+    "emailVerified": true,
+    "date": "2026-10-13"
+  },
+  {
     "id": "app_mv578nup",
     "name": "Member",
     "email": "dharabicdebateclub@gmail.com",
