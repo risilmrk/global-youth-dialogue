@@ -21,25 +21,21 @@
     "date": "2026-10-13"
   },
   {
-    "id": "app_mv6wc6f9",
-    "name": "hello haai",
+    "id": "app_mv7qrerj",
+    "name": "hello hai",
     "email": "hello@gmail.com",
-    "password": "hello@123",
-    "country": "United States",
+    "password": "hello123",
+    "country": "India",
     "flag": "INT",
     "interests": [
       "Global Affairs",
-      "Technology & AI",
-      "Education & Knowledge",
-      "Environment & Climate",
-      "Economy & Trade",
-      "Governance & Society"
+      "hhj"
     ],
-    "debateExperience": "Everything",
-    "motivation": "Fun",
-    "status": "Rejected",
+    "debateExperience": "hj",
+    "motivation": "hj",
+    "status": "Pending",
     "emailVerified": true,
-    "date": "2026-10-13"
+    "date": "2026-10-14"
   },
   {
     "id": "app_mv6vqybh",
