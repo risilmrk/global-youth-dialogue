@@ -1751,10 +1751,38 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.hash = `#${hashToSet}`;
       }
     }
+    // If landing on home section on mobile, center the 2nd box so Box 1 is half-visible on left and Box 3 on right
+    if (targetId === 'home') {
+      setTimeout(() => centerHomeHighlightsCards(false), 80);
+    }
+  }
+
+  function centerHomeHighlightsCards(smooth = false) {
+    if (window.innerWidth > 768) return;
+    const grid = document.querySelector('.home-highlights-grid');
+    if (!grid) return;
+    const children = Array.from(grid.children).filter(el => 
+      el.classList.contains('highlight-feature-card') || el.classList.contains('highlight-sunburst-card-wrap')
+    );
+    if (children.length >= 2) {
+      const card2 = children[1];
+      const targetScroll = card2.offsetLeft - (grid.clientWidth - card2.clientWidth) / 2;
+      grid.scrollTo({
+        left: targetScroll,
+        behavior: smooth ? 'smooth' : 'instant'
+      });
+    }
   }
 
   // Expose to window for global access
   window.switchPublicSection = switchPublicSection;
+  window.centerHomeHighlightsCards = centerHomeHighlightsCards;
+
+  window.addEventListener('resize', () => {
+    if (currentPublicSection === 'home') {
+      centerHomeHighlightsCards(false);
+    }
+  });
 
   // Delegated click listener on document for guaranteed event handling
   document.addEventListener('click', (e) => {

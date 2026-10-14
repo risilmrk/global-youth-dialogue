@@ -692,36 +692,41 @@
       cursor: pointer;
     }
 
-    /* Horizontal Card Slider / Snap Showcase */
+    /* Horizontal Card Slider / Snap Showcase (Small Boxes Peek Layout) */
     .mob-card-slider {
       display: flex;
-      gap: 14px;
+      gap: 12px;
       overflow-x: auto;
-      padding-bottom: 12px;
       margin: 0 -20px;
-      padding-left: 20px;
-      padding-right: 20px;
+      padding: 10px calc(24vw - 6px) 16px calc(24vw - 6px);
       scroll-snap-type: x mandatory;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
     }
 
     .mob-card-slider::-webkit-scrollbar {
       display: none;
     }
 
-    /* Slider Card 1: Vibrant Indigo Gradient */
+    /* Small Box Feature Cards */
     .feature-card {
-      flex: 0 0 230px;
-      scroll-snap-align: start;
-      border-radius: 20px;
-      padding: 20px;
+      flex: 0 0 calc(52vw - 6px);
+      width: calc(52vw - 6px);
+      min-width: 185px;
+      max-width: 220px;
+      height: 205px;
+      min-height: 205px;
+      max-height: 205px;
+      scroll-snap-align: center;
+      border-radius: 18px;
+      padding: 14px 14px 12px 14px;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      min-height: 200px;
+      justify-content: flex-start;
       position: relative;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
 
     .feature-card:active {
@@ -1803,9 +1808,22 @@
     function scrollSlider() {
       const slider = document.getElementById('cardSlider');
       if (slider) {
-        slider.scrollBy({ left: 240, behavior: 'smooth' });
+        slider.scrollBy({ left: 200, behavior: 'smooth' });
       }
     }
+
+    function centerCardSlider() {
+      const slider = document.getElementById('cardSlider');
+      if (!slider) return;
+      const cards = slider.querySelectorAll('.feature-card');
+      if (cards.length >= 2) {
+        const card2 = cards[1];
+        const targetScroll = card2.offsetLeft - (slider.clientWidth - card2.clientWidth) / 2;
+        slider.scrollTo({ left: targetScroll, behavior: 'instant' });
+      }
+    }
+    window.addEventListener('load', centerCardSlider);
+    setTimeout(centerCardSlider, 120);
   </script>
 </body>
 </html>

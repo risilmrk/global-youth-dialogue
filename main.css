@@ -5327,40 +5327,146 @@ body.rtl-mode .mobile-nav-drawer {
   }
 
   /* "Inside GYDE" Horizontal Snap Carousel on Mobile (Reference Model) */
+  /* "Inside GYDE" Small Boxes Peek Carousel on Mobile */
+  .home-highlights-section {
+    padding: 1.5rem 0 2rem !important;
+    overflow: hidden !important;
+  }
+  .home-highlights-section .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
   .home-highlights-grid {
     display: flex !important;
-    gap: 14px !important;
+    gap: 12px !important;
     overflow-x: auto !important;
     scroll-snap-type: x mandatory !important;
     -webkit-overflow-scrolling: touch !important;
-    padding-bottom: 14px !important;
-    margin: 0 -0.85rem !important;
-    padding-left: 0.85rem !important;
-    padding-right: 0.85rem !important;
+    scrollbar-width: none !important;
+    margin: 0 !important;
+    padding: 12px calc(24vw - 6px) 18px calc(24vw - 6px) !important;
+    box-sizing: border-box !important;
   }
   .home-highlights-grid::-webkit-scrollbar {
-    display: none;
+    display: none !important;
   }
-  .highlight-feature-card,
-  .highlight-sunburst-card-wrap {
-    flex: 0 0 240px !important;
-    scroll-snap-align: start !important;
-    border-radius: 20px !important;
-    padding: 22px 20px !important;
-    min-height: 210px !important;
+
+  .home-highlights-grid > .highlight-feature-card,
+  .home-highlights-grid > .highlight-sunburst-card-wrap {
+    flex: 0 0 calc(52vw - 6px) !important;
+    width: calc(52vw - 6px) !important;
+    min-width: 185px !important;
+    max-width: 220px !important;
+    height: 205px !important;
+    min-height: 205px !important;
+    max-height: 205px !important;
+    scroll-snap-align: center !important;
+    scroll-snap-stop: normal !important;
+    border-radius: 18px !important;
+    padding: 14px 14px 12px 14px !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: space-between !important;
+    justify-content: flex-start !important;
     margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    transition: transform 0.25s ease, box-shadow 0.25s ease !important;
   }
+
+  .highlight-sunburst-card-wrap {
+    position: relative !important;
+    display: flex !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
   .highlight-sunburst-card-wrap .highlight-feature-card {
     flex: 1 1 100% !important;
     width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    border-radius: 18px !important;
+    padding: 14px 14px 12px 14px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    box-sizing: border-box !important;
   }
+
+  .highlight-card-sunburst {
+    top: -10px !important;
+    inset-inline-end: -10px !important;
+    width: 38px !important;
+    height: 38px !important;
+    pointer-events: none !important;
+  }
+
+  /* Compact Icon Badges inside small boxes */
+  .home-highlights-grid .feature-icon-badge {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    min-height: 30px !important;
+    border-radius: 8px !important;
+    margin-bottom: 0.45rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
+  .home-highlights-grid .feature-icon-badge svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  /* Compact Headings inside small boxes */
+  .home-highlights-grid h3 {
+    font-size: 0.9rem !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+    margin: 0 0 0.35rem 0 !important;
+    white-space: normal !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+
+  /* Compact Paragraphs inside small boxes */
+  .home-highlights-grid p {
+    font-size: 0.72rem !important;
+    line-height: 1.34 !important;
+    margin: 0 0 0.4rem 0 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    opacity: 0.88 !important;
+  }
+
+  /* Compact Learn More Link */
+  .home-highlights-grid .feature-learn-more {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    margin-top: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+    padding-top: 0.2rem !important;
+  }
+
+  /* Box 1 (About): Solid Royal Indigo Gradient */
   .highlight-feature-card[data-public-nav="about"] {
     background: linear-gradient(145deg, #4851BA 0%, #6366f1 100%) !important;
     color: #ffffff !important;
-    box-shadow: 0 10px 25px rgba(72, 81, 186, 0.3) !important;
+    box-shadow: 0 8px 20px rgba(72, 81, 186, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
   }
   .highlight-feature-card[data-public-nav="about"] h3,
   .highlight-feature-card[data-public-nav="about"] p,
@@ -5368,27 +5474,61 @@ body.rtl-mode .mobile-nav-drawer {
     color: #ffffff !important;
   }
   .highlight-feature-card[data-public-nav="about"] .feature-icon-badge {
-    background: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.22) !important;
     color: #ffffff !important;
   }
+
+  /* Box 2 (Topics): Distinct Glass Card */
   .highlight-feature-card[data-public-nav="topics"] {
     background: var(--bg-surface, #ffffff) !important;
-    border: 1px solid rgba(72, 81, 186, 0.14) !important;
+    border: 1.5px solid rgba(168, 85, 247, 0.35) !important;
+    box-shadow: 0 8px 24px rgba(158, 89, 172, 0.16) !important;
   }
+  [data-theme="dark"] .highlight-feature-card[data-public-nav="topics"] {
+    background: #141624 !important;
+    border: 1.5px solid rgba(168, 85, 247, 0.4) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6) !important;
+  }
+  [data-theme="dark"] .highlight-feature-card[data-public-nav="topics"] h3 {
+    color: #ffffff !important;
+  }
+  [data-theme="dark"] .highlight-feature-card[data-public-nav="topics"] p {
+    color: #cbd5e1 !important;
+  }
+  [data-theme="dark"] .highlight-feature-card[data-public-nav="topics"] .feature-learn-more {
+    color: #c084fc !important;
+  }
+  .highlight-feature-card[data-public-nav="topics"] .feature-icon-badge {
+    background: rgba(168, 85, 247, 0.15) !important;
+    color: #a855f7 !important;
+  }
+
+  /* Box 3 (Impact): Modern Dark/Tinted Card */
   .highlight-feature-card[data-public-nav="impact"] {
-    background: #090d16 !important;
+    background: #0f172a !important;
     color: #ffffff !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35) !important;
   }
-  .highlight-feature-card[data-public-nav="impact"] h3,
-  .highlight-feature-card[data-public-nav="impact"] p,
-  .highlight-feature-card[data-public-nav="impact"] .feature-learn-more {
-    color: #ffffff !important;
+  [data-theme="light"] .highlight-feature-card[data-public-nav="impact"] {
+    background: #f8fafc !important;
+    color: #0f172a !important;
+    border: 1px solid rgba(15, 23, 42, 0.12) !important;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08) !important;
+  }
+  [data-theme="light"] .highlight-feature-card[data-public-nav="impact"] h3 {
+    color: #0f172a !important;
+  }
+  [data-theme="light"] .highlight-feature-card[data-public-nav="impact"] p {
+    color: #64748b !important;
+  }
+  [data-theme="light"] .highlight-feature-card[data-public-nav="impact"] .feature-learn-more {
+    color: #ec4899 !important;
   }
   .highlight-feature-card[data-public-nav="impact"] .feature-icon-badge {
-    background: rgba(255, 255, 255, 0.12) !important;
-    color: #ff5e9c !important;
+    background: rgba(236, 72, 153, 0.15) !important;
+    color: #ec4899 !important;
   }
 
   /* Public Mobile Bottom Tab Bar & Quick Sheet */
