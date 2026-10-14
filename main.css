@@ -6453,12 +6453,13 @@ body.rtl-mode .mobile-nav-drawer {
   .portal-page-header .header-actions-group { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; width: 100% !important; margin-top: 0.65rem !important; }
   .portal-page-header .btn { font-size: 0.84rem !important; font-weight: 600 !important; min-height: 44px !important; padding: 0.6rem 0.95rem !important; border-radius: 12px !important; justify-content: center !important; }
   
-  .coord-kpi-grid { grid-template-columns: 1fr !important; gap: 0.85rem !important; margin-bottom: 1.75rem !important; }
-  .kpi-card { padding: 1.15rem 1.25rem !important; gap: 0.95rem !important; border-radius: 18px !important; min-width: 0 !important; }
-  .kpi-icon { width: 44px !important; height: 44px !important; border-radius: 12px !important; flex-shrink: 0 !important; }
-  .kpi-icon svg { width: 22px !important; height: 22px !important; }
-  .kpi-info h3 { font-size: 1.55rem !important; font-weight: 800 !important; margin-bottom: 0.2rem !important; }
-  .kpi-info p { font-size: 0.85rem !important; font-weight: 600 !important; }
+  .coord-kpi-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 0.75rem !important; margin-bottom: 1.75rem !important; width: 100% !important; }
+  .kpi-card { padding: 1.1rem 0.95rem !important; gap: 0.65rem !important; border-radius: 18px !important; min-width: 0 !important; display: flex !important; flex-direction: column !important; align-items: flex-start !important; justify-content: space-between !important; min-height: 118px !important; box-sizing: border-box !important; }
+  .kpi-icon { width: 40px !important; height: 40px !important; border-radius: 12px !important; flex-shrink: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; margin-bottom: 0.15rem !important; }
+  .kpi-icon svg { width: 20px !important; height: 20px !important; }
+  .kpi-info, .kpi-card > div:not(.kpi-icon) { display: flex !important; flex-direction: column !important; align-items: flex-start !important; width: 100% !important; min-width: 0 !important; }
+  .kpi-info h3, .kpi-card .kpi-num { font-size: 1.6rem !important; font-weight: 800 !important; margin-bottom: 0.2rem !important; line-height: 1.1 !important; letter-spacing: -0.02em !important; }
+  .kpi-info p, .kpi-card .kpi-label { font-size: 0.78rem !important; font-weight: 600 !important; line-height: 1.3 !important; color: var(--text-muted) !important; margin: 0 !important; }
   
   .category-card { padding: 0.75rem 0.65rem !important; }
   .session-card-preview { padding: 0.75rem 0.65rem !important; }
@@ -6477,7 +6478,7 @@ body.rtl-mode .mobile-nav-drawer {
 /* 5. Compact Small Mobiles (<= 360px) */
 @media (max-width: 360px) {
   .brand-logo-img { height: 22px !important; max-width: 100px !important; }
-  .coord-kpi-grid { grid-template-columns: 1fr !important; }
+  .coord-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 0.55rem !important; }
   .brand-title { font-size: 0.72rem; }
   .brand-icon-wrapper { width: 24px; height: 24px; font-size: 0.66rem; }
   .btn-lang { padding: 0.12rem 0.2rem; font-size: 0.62rem; }
@@ -8606,44 +8607,66 @@ html, body {
     border-radius: 12px !important;
   }
   .coord-kpi-grid {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 1rem !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem !important;
     margin-bottom: 1.85rem !important;
     width: 100% !important;
   }
   .kpi-card {
-    padding: 1.25rem 1.35rem !important;
-    gap: 1.15rem !important;
-    border-radius: 20px !important;
+    padding: 1.15rem 1rem !important;
+    gap: 0.75rem !important;
+    border-radius: 18px !important;
     display: flex !important;
-    align-items: center !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: space-between !important;
+    min-height: 124px !important;
     min-width: 0 !important;
     margin-bottom: 0 !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    overflow: hidden !important;
   }
   .kpi-icon {
-    width: 48px !important;
-    height: 48px !important;
-    border-radius: 14px !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 12px !important;
     flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    margin-bottom: 0.2rem !important;
   }
   .kpi-icon svg {
-    width: 24px !important;
-    height: 24px !important;
+    width: 22px !important;
+    height: 22px !important;
   }
-  .kpi-info h3 {
-    font-size: 1.65rem !important;
+  .kpi-info,
+  .kpi-card > div:not(.kpi-icon) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+  .kpi-info h3,
+  .kpi-card .kpi-num {
+    font-size: 1.7rem !important;
     font-weight: 800 !important;
-    margin-bottom: 0.25rem !important;
-    line-height: 1.15 !important;
+    margin-bottom: 0.2rem !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.02em !important;
   }
-  .kpi-info p {
-    font-size: 0.88rem !important;
+  .kpi-info p,
+  .kpi-card .kpi-label {
+    font-size: 0.8rem !important;
     font-weight: 600 !important;
+    line-height: 1.3 !important;
     color: var(--text-muted) !important;
+    margin: 0 !important;
+    word-break: normal !important;
   }
   .coord-filter-tabs {
     flex-wrap: wrap !important;
@@ -8709,10 +8732,26 @@ html, body {
   .process-grid, .process-grid-6,
   .categories-grid, .public-sessions-grid,
   .impact-pillars-grid, .reps-grid,
-  .dashboard-grid, .quick-access-grid,
-  .writings-grid {
+  .dashboard-grid, .writings-grid {
     grid-template-columns: 1fr !important;
     gap: 1rem !important;
+  }
+  .quick-access-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.85rem !important;
+  }
+  .qa-card {
+    padding: 1.15rem 0.95rem !important;
+    border-radius: 16px !important;
+    min-height: 98px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    gap: 0.5rem !important;
+    box-sizing: border-box !important;
   }
 
   /* 8. Modern Editorial Hero Gallery Collage on Mobile (Matches Reference Model) */
@@ -8985,8 +9024,8 @@ html, body {
     gap: 0.5rem !important;
   }
   .coord-kpi-grid {
-    grid-template-columns: 1fr !important;
-    gap: 1rem !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
   }
   #applyInterestsGrid {
     grid-template-columns: 1fr !important;
