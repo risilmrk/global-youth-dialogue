@@ -296,6 +296,134 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   document.getElementById('authModalClose')?.addEventListener('click', () => closeModal('authModal'));
+
+  // =========================================================================
+  // PUBLIC MOBILE QUICK SHEET & EXPANDABLE ROLE SIGN-IN (Phone View Only)
+  // =========================================================================
+  function closePublicQuickSheet() {
+    const sheet = document.getElementById('publicQuickSheet');
+    const overlay = document.getElementById('publicSheetOverlay');
+    if (sheet) sheet.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+  }
+
+  function openPublicQuickSheet(autoExpandSignIn = false) {
+    const sheet = document.getElementById('publicQuickSheet');
+    const overlay = document.getElementById('publicSheetOverlay');
+    const expandWrap = document.getElementById('sheetSignInExpandable');
+    const trigger = document.getElementById('sheetSignInToggleBtn');
+    if (overlay) overlay.classList.add('open');
+    if (sheet) sheet.classList.add('open');
+    if (autoExpandSignIn && expandWrap) {
+      expandWrap.classList.add('open');
+      if (trigger) trigger.setAttribute('aria-expanded', 'true');
+    }
+    updateMobileSheetControlsUI();
+  }
+
+  function updateMobileSheetControlsUI() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const themeText = document.getElementById('sheetThemeText');
+    const themeIcon = document.getElementById('sheetThemeIcon');
+    if (themeText) {
+      themeText.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+    if (themeIcon) {
+      themeIcon.innerHTML = currentTheme === 'dark'
+        ? `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>`
+        : `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path></svg>`;
+    }
+
+    const currentLang = (window.i18n && typeof window.i18n.getLang === 'function') ? window.i18n.getLang() : 'en';
+    const langText = document.getElementById('sheetLangText');
+    if (langText) {
+      langText.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+    }
+  }
+
+  // Floating Action Button (+) opens quick sheet
+  document.getElementById('publicMobileFabBtn')?.addEventListener('click', () => {
+    const sheet = document.getElementById('publicQuickSheet');
+    if (sheet && sheet.classList.contains('open')) {
+      closePublicQuickSheet();
+    } else {
+      openPublicQuickSheet(false);
+    }
+  });
+
+  // Bottom Tab Bar "Sign In" button opens quick sheet with roles pre-expanded
+  document.getElementById('publicMobileLoginBtn')?.addEventListener('click', () => {
+    openPublicQuickSheet(true);
+  });
+
+  // Backdrop click closes sheet
+  document.getElementById('publicSheetOverlay')?.addEventListener('click', closePublicQuickSheet);
+
+  // Apply button inside sheet
+  document.getElementById('sheetApplyBtn')?.addEventListener('click', () => {
+    closePublicQuickSheet();
+    openUnifiedApplyModal();
+  });
+
+  // Expandable "Sign In" button toggles roles tray
+  document.getElementById('sheetSignInToggleBtn')?.addEventListener('click', () => {
+    const wrap = document.getElementById('sheetSignInExpandable');
+    const trigger = document.getElementById('sheetSignInToggleBtn');
+    if (wrap) {
+      const isOpen = wrap.classList.toggle('open');
+      if (trigger) trigger.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+  });
+
+  // Role selections: Member, Presenter, Admin
+  document.getElementById('sheetRoleMemberBtn')?.addEventListener('click', () => {
+    closePublicQuickSheet();
+    if (typeof window.selectSignInRole === 'function') {
+      window.selectSignInRole('member');
+    }
+    openModal('authModal');
+  });
+
+  document.getElementById('sheetRolePresenterBtn')?.addEventListener('click', () => {
+    closePublicQuickSheet();
+    if (typeof window.selectSignInRole === 'function') {
+      window.selectSignInRole('presenter');
+    }
+    openModal('authModal');
+  });
+
+  document.getElementById('sheetRoleAdminBtn')?.addEventListener('click', () => {
+    closePublicQuickSheet();
+    if (typeof window.selectSignInRole === 'function') {
+      window.selectSignInRole('admin');
+    }
+    openModal('authModal');
+  });
+
+  // Theme switch in mobile sheet
+  document.getElementById('sheetThemeToggleBtn')?.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('gyde_theme_v2', 'set');
+    if (typeof applyTheme === 'function') {
+      applyTheme(newTheme);
+    } else {
+      document.documentElement.setAttribute('data-theme', newTheme);
+      document.body.setAttribute('data-theme', newTheme);
+      localStorage.setItem('gyde_theme', newTheme);
+    }
+    updateMobileSheetControlsUI();
+  });
+
+  // Language switch in mobile sheet
+  document.getElementById('sheetLangToggleBtn')?.addEventListener('click', () => {
+    if (window.i18n && typeof window.i18n.getLang === 'function') {
+      const nextLang = window.i18n.getLang() === 'en' ? 'ar' : 'en';
+      window.i18n.setLang(nextLang);
+      if (typeof renderAll === 'function') renderAll();
+    }
+    updateMobileSheetControlsUI();
+  });
   document.getElementById('applyModalClose')?.addEventListener('click', () => closeModal('applyModal'));
   document.getElementById('sessionDetailClose')?.addEventListener('click', () => closeModal('sessionDetailModal'));
   document.getElementById('writingReaderClose')?.addEventListener('click', () => closeModal('writingReaderModal'));
@@ -1582,9 +1710,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Update active nav link indicators
-    document.querySelectorAll('#publicNav .nav-link, #mobileNavDrawer .mobile-nav-link, .site-footer a[href^="#"]').forEach(link => {
+    document.querySelectorAll('#publicNav .nav-link, #mobileNavDrawer .mobile-nav-link, .site-footer a[href^="#"], #publicMobileTabBar .public-tab-btn').forEach(link => {
       const href = link.getAttribute('href');
-      if (href === `#${rawId}` || (isProcess && href === '#process')) {
+      const dataNav = link.getAttribute('data-public-nav');
+      if (href === `#${rawId}` || dataNav === rawId || (isProcess && (href === '#process' || dataNav === 'process'))) {
         link.classList.add('active');
       } else {
         link.classList.remove('active');
