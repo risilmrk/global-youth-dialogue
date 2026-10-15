@@ -8,3 +8,14 @@ Thumbs.db
 server.py
 email_config.json
 __pycache__/
+
+# Environments & secrets
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+dist/
+build/
+.turbo/
+coverage/

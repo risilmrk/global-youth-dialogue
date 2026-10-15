@@ -1,12 +1,19 @@
 {
   "name": "global-youth-dialogue",
   "version": "1.0.0",
-  "description": "Global Youth Dialogue & Exchange (GYDE) Web Platform",
+  "description": "GYDE — Global Youth Dialogue & Exchange Monorepo Platform",
   "private": true,
-  "engines": {
-    "node": ">=18.x"
-  },
-  "dependencies": {
-    "nodemailer": "^6.9.15"
+  "scripts": {
+    "dev:api": "npm --prefix api run dev",
+    "dev:web": "npm --prefix web run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "build:api": "npm --prefix api run build",
+    "build:web": "npm --prefix web run build",
+    "build:admin": "npm --prefix admin run build",
+    "typecheck:api": "npm --prefix api run typecheck",
+    "typecheck:web": "npm --prefix web run typecheck",
+    "typecheck:admin": "npm --prefix admin run typecheck",
+    "seed": "npm --prefix api run seed",
+    "migrate:legacy": "npm --prefix api run migrate:legacy"
   }
 }

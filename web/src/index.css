@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-canvas: #F7FAF9;
+    --text-primary: #0F172A;
+    --primary-green: #0E4D3C;
+    --primary-gold: #B88E3E;
+  }
+
+  [data-theme="dark"] {
+    --bg-canvas: #090D16;
+    --text-primary: #F8FAFC;
+  }
+
+  html[dir="rtl"] {
+    font-family: 'Cairo', sans-serif;
+  }
+
+  html[dir="rtl"] .serif-heading {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 800;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+}
+
+.serif-heading {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Glassmorphism cards */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+[data-theme="dark"] .glass-panel {
+  background: rgba(19, 24, 38, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(30, 41, 59, 0.8);
+}
