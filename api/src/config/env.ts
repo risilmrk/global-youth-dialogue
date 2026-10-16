@@ -7,7 +7,9 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 dotenv.config();
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  NODE_ENV: z
+    .enum(['development', 'production', 'test'])
+    .default(process.env.VERCEL ? 'production' : 'development'),
   PORT: z.string().default('5000').transform((v) => parseInt(v, 10)),
   API_PREFIX: z.string().default('/api/v1'),
   MONGODB_URI: z.string().default('mongodb://127.0.0.1:27017/gyde'),

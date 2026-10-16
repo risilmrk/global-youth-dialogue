@@ -14,13 +14,24 @@ const app = express();
 // Security HTTP headers
 app.use(helmet());
 
-// CORS configuration with explicit frontend allowlist
-const allowedOrigins = [env.WEB_ORIGIN, env.ADMIN_ORIGIN, 'http://localhost:5173', 'http://localhost:5174'];
+// CORS configuration with explicit frontend allowlist and Vercel preview support
+const allowedOrigins = [
+  env.WEB_ORIGIN,
+  env.ADMIN_ORIGIN,
+  'http://localhost:5173',
+  'http://localhost:5174',
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow requests with no origin (e.g. mobile apps, server-to-server) or in allowlist or vercel previews
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        env.NODE_ENV !== 'production'
+      ) {
         callback(null, true);
       } else {
         callback(new Error(`Origin ${origin} not allowed by CORS`));
@@ -28,7 +39,13 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'X-Client-App',
+      'x-client-app',
+    ],
   })
 );
 

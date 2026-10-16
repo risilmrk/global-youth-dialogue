@@ -5,10 +5,15 @@ import { logger } from './logger';
 let memoryServer: any = null;
 
 export async function connectDatabase(): Promise<void> {
+  // Reuse existing connection in serverless / warm container invocations
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
+
   try {
     mongoose.set('strictQuery', true);
 
-    // Try connecting to the provided MONGODB_URI with a 2-second timeout
+    // Try connecting to the provided MONGODB_URI with a 2.5-second timeout
     await mongoose.connect(env.MONGODB_URI, {
       serverSelectionTimeoutMS: 2500,
     });
