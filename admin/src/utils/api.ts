@@ -1,4 +1,38 @@
-export const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL || '/api/v1';
+function getApiBase(): string {
+  const origin = (import.meta as any).env?.VITE_API_ORIGIN;
+  const baseUrl = (import.meta as any).env?.VITE_API_BASE_URL;
+
+  // If VITE_API_ORIGIN is specified from .env or Vercel (e.g. global-youth-dialogue-api.vercel.app)
+  if (origin && origin !== 'http://localhost:5000') {
+    let cleanOrigin = origin.trim().replace(/\/+$/, '');
+    if (!cleanOrigin.startsWith('http://') && !cleanOrigin.startsWith('https://')) {
+      cleanOrigin = `https://${cleanOrigin}`;
+    }
+    return `${cleanOrigin}/api/v1`;
+  }
+
+  // If VITE_API_BASE_URL is explicitly set to an absolute URL
+  if (baseUrl && (baseUrl.startsWith('http://') || baseUrl.startsWith('https://'))) {
+    return baseUrl.trim().replace(/\/+$/, '');
+  }
+
+  // In local dev with localhost:5000, use Vite proxy /api/v1
+  if ((import.meta as any).env?.DEV) {
+    return baseUrl || '/api/v1';
+  }
+
+  if (origin) {
+    let cleanOrigin = origin.trim().replace(/\/+$/, '');
+    if (!cleanOrigin.startsWith('http://') && !cleanOrigin.startsWith('https://')) {
+      cleanOrigin = `https://${cleanOrigin}`;
+    }
+    return `${cleanOrigin}/api/v1`;
+  }
+
+  return baseUrl || '/api/v1';
+}
+
+export const API_BASE = getApiBase();
 
 export class ApiError extends Error {
   public statusCode: number;
